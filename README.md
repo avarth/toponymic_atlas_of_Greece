@@ -1,5 +1,7 @@
 # Greek Toponymic Atlas
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19443730.svg)](https://doi.org/10.5281/zenodo.19443730)
+
 Etymological classification and interactive spatial analysis of 41,932 unique place names (90,592 geocoded features) from the Greek National Gazetteer.
 
 The project combines morphological rule-based classification, large language model (LLM) disambiguation, and expert validation to assign each toponym an etymological origin (Greek, Turkish/Ottoman, Slavic, etc.) and semantic category (religious, geomorphic, flora, etc.). Results are visualised in an interactive hex-binned web atlas.
