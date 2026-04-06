@@ -61,13 +61,13 @@ Semantic categories are assigned primarily by the LLM in Stage 2, which analyses
 
 | Etymology | Unique Names | % |
 |-----------|-------------|---|
-| Greek | 40,643 | 96.93% |
-| Turkish/Ottoman | 699 | 1.67% |
-| Slavic | 359 | 0.86% |
-| Mixed/Compound | 159 | 0.38% |
+| Greek | 40,670 | 96.99% |
+| Turkish/Ottoman | 691 | 1.65% |
+| Slavic | 350 | 0.83% |
+| Mixed/Compound | 148 | 0.35% |
 | Unknown | 37 | 0.09% |
 | Albanian | 18 | 0.04% |
-| Venetian/Italian | 17 | 0.04% |
+| Venetian/Italian | 18 | 0.04% |
 
 ## Interactive Atlas
 
