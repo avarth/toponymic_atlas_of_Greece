@@ -1,6 +1,9 @@
 # Greek Toponymic Atlas
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19443730.svg)](https://doi.org/10.5281/zenodo.19443730)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Language: Python](https://img.shields.io/badge/Python-3.10+-yellow.svg)](https://python.org)
+[![Language: JavaScript](https://img.shields.io/badge/JavaScript-ES6+-f7df1e.svg)](atlas/greek_toponymic_atlas.html)
 
 Etymological classification and interactive spatial analysis of 41,932 unique place names (90,592 geocoded features) from the Greek National Gazetteer.
 
