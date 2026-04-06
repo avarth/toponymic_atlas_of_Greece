@@ -1,0 +1,35 @@
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+.claude/
+
+# Secrets
+.env
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Large data — not tracked (root-level only)
+/data/
+/round1/
+/round2/
+/round3/
+/analysis/*
+!/analysis/README.md
+/trash/
+
+# Internal knowledge base (not for public repo)
+/vault/
+
+# Stale development plans
+/docs/

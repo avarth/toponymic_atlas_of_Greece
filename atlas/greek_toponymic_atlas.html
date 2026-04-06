@@ -1,0 +1,1344 @@
+<!--
+  Atlas HTML skeleton — template for build.py.
+
+  build.py replaces placeholders with src/css/style.css and
+  concatenated src/js/*.js (constants → i18n →
+  colors → layers → charts → sacred → poly → oddities → main)
+
+  Output (greek_toponymic_atlas.html) is written to atlas/
+  alongside atlas/data/ so fetch('data/*.json') paths resolve correctly.
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ελληνικός Τοπωνυμικός Άτλας</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" integrity="sha512-h9FcoyWjHcOcmEVkxOfTLnmZFWIH0iZhZT1H2TbOq55xssQGEJHEaIm+PgoUaZbRvQTNTluNOEfb1ZRy6D3BOw==" crossorigin="anonymous" referrerpolicy="no-referrer"/>
+<style>
+/* Greek Toponymic Atlas — Aegean Academic Modernism
+   Source file for build.py (Tier 2). Do not edit the built HTML directly.
+   Build: cd atlas && python build.py
+*/
+/* Self-hosted fonts — no third-party requests (GDPR-safe) */
+@font-face{font-family:'Newsreader';font-style:normal;font-weight:300 600;font-display:swap;
+  src:url('fonts/newsreader-latin.woff2') format('woff2');
+  unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
+@font-face{font-family:'Newsreader';font-style:italic;font-weight:400;font-display:swap;
+  src:url('fonts/newsreader-italic-latin.woff2') format('woff2');
+  unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
+@font-face{font-family:'Geist';font-style:normal;font-weight:300 700;font-display:swap;
+  src:url('fonts/geist-latin.woff2') format('woff2');
+  unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
+
+:root{
+  /* Aegean Academic palette — warm, disciplined */
+  --paper:#f4f1ea;          /* lime-washed wall */
+  --panel:#fbf9f3;          /* parchment */
+  --ink:#1a1d26;            /* near-black, cool undertone */
+  --muted:#6b6458;          /* warm stone */
+  --faint:#b8b0a4;          /* dry stone */
+  --rule:#d9d3c7;           /* hairline divider */
+  --rule-soft:#e8e2d4;      /* softer divider */
+  --accent:#1e3a5f;         /* deep Aegean */
+  --accent-lt:#c4d4e0;      /* sea mist */
+  --terracotta:#b34a2c;     /* signal */
+  --olive:#5f6b3a;          /* secondary accent */
+
+  /* legacy aliases (keep JS references working) */
+  --bg:var(--paper);
+  --bdr:var(--rule);
+  --text:var(--ink);
+  --blue:var(--accent);
+  --blue-lt:var(--accent-lt);
+
+  --w:360px;
+
+  /* Typography */
+  --serif:'Newsreader',Georgia,'Times New Roman',serif;
+  --sans:'Geist',-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;
+}
+
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:var(--sans);background:var(--paper);color:var(--ink);font-feature-settings:"ss01","cv11";-webkit-font-smoothing:antialiased;}
+
+#map{position:fixed;top:0;left:var(--w);right:0;bottom:0;z-index:1;}
+#panel{position:fixed;top:0;left:0;width:var(--w);bottom:0;background:var(--panel);
+  border-right:1px solid var(--rule);display:flex;flex-direction:column;z-index:10;overflow:hidden;}
+
+/* ── HEADER ─────────────────────────────────────────────── */
+.hdr{padding:22px 22px 16px;border-bottom:1px solid var(--rule);flex-shrink:0;
+  display:flex;flex-direction:column;align-items:stretch;gap:14px;}
+.hdr h1{font-family:var(--serif);font-size:21px;font-weight:400;letter-spacing:-.005em;
+  line-height:1.15;color:var(--ink);font-feature-settings:"onum";white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+html[lang="el"] .hdr h1{font-size:18px;letter-spacing:-.01em;}
+.hdr-ctrls{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+
+.lang-btn{padding:5px 10px;border-radius:2px;border:1px solid var(--rule);background:transparent;
+  font-family:var(--sans);font-size:9px;font-weight:500;cursor:pointer;color:var(--muted);
+  transition:all .2s ease;text-transform:uppercase;letter-spacing:.08em;white-space:nowrap;}
+.lang-btn:hover{border-color:var(--accent);color:var(--accent);}
+
+.filter-toggle{display:inline-flex;border:1px solid var(--rule);border-radius:2px;overflow:hidden;}
+.fbtn{padding:5px 10px;border:none;background:transparent;font-family:var(--sans);font-size:9px;
+  font-weight:500;cursor:pointer;color:var(--muted);transition:all .2s ease;
+  border-right:1px solid var(--rule);text-transform:uppercase;letter-spacing:.08em;white-space:nowrap;}
+.fbtn:last-child{border-right:none;}
+.fbtn:hover{color:var(--ink);}
+.fbtn.on{background:var(--ink);color:var(--panel);}
+
+/* ── TABS ───────────────────────────────────────────────── */
+.tabs{display:flex;border-bottom:1px solid var(--rule);flex-shrink:0;padding:0 6px;}
+.tab{flex:1;padding:10px 3px 9px;text-align:center;font-family:var(--sans);font-size:8.5px;
+  font-weight:500;color:var(--muted);cursor:pointer;border-bottom:1px solid transparent;
+  margin-bottom:-1px;transition:all .2s ease;user-select:none;white-space:normal;line-height:1.3;
+  text-transform:uppercase;letter-spacing:.06em;}
+.tab:hover{color:var(--ink);}
+.tab.on{color:var(--ink);border-bottom-color:var(--ink);}
+
+/* ── GREEK TYPOGRAPHY OVERRIDES ─────────────────────────── */
+/* Greek uppercase drops tones (typographic convention); simplest path is
+   to not uppercase Greek UI chrome at all — use sentence case with tracking. */
+html[lang="el"] .tab,
+html[lang="el"] .fbtn,
+html[lang="el"] .lang-btn,
+html[lang="el"] .chart-title,
+html[lang="el"] .cat-hdr,
+html[lang="el"] .hdr p,
+html[lang="el"] .etym-note b{
+  text-transform:none;letter-spacing:.02em;
+}
+html[lang="el"] .tab{font-size:10px;letter-spacing:.01em;}
+html[lang="el"] .fbtn,html[lang="el"] .lang-btn{font-size:10px;letter-spacing:.01em;}
+html[lang="el"] .chart-title,html[lang="el"] .cat-hdr{font-size:10px;letter-spacing:.02em;}
+
+/* ── PANE ───────────────────────────────────────────────── */
+.pane{flex:1;overflow-y:auto;display:none;padding:18px 22px 40px;}
+.pane.on{display:block;}
+.pane::-webkit-scrollbar{width:6px;}
+.pane::-webkit-scrollbar-thumb{background:var(--rule);border-radius:0;}
+
+/* ── LAYER CARDS ────────────────────────────────────────── */
+.lcard{border:none;border-top:1px solid var(--rule-soft);padding:14px 0 12px;margin:0;
+  cursor:pointer;transition:all .2s ease;position:relative;}
+.lcard:first-of-type{border-top:none;padding-top:4px;}
+.lcard:hover .ln{color:var(--accent);}
+.lcard.on{background:transparent;}
+.lcard.on::before{content:'';position:absolute;left:-22px;top:14px;bottom:12px;width:2px;background:var(--accent);}
+.lcard.on .ln{color:var(--accent);}
+.lcard-row{display:flex;align-items:flex-start;gap:12px;}
+.sw{width:28px;height:28px;flex-shrink:0;margin-top:1px;color:var(--muted);transition:color .2s ease;}
+.sw svg{width:100%;height:100%;display:block;overflow:visible;}
+.lcard.on .sw{color:var(--accent);}
+.sw.sw-cat{color:inherit;}
+.ln{font-family:var(--serif);font-size:15px;font-weight:400;line-height:1.25;color:var(--ink);
+  transition:color .2s ease;font-feature-settings:"onum";}
+.ld-desc{font-size:10.5px;color:var(--muted);margin-top:3px;line-height:1.5;font-weight:400;}
+.leg{display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:10px;font-size:9.5px;color:var(--muted);
+  font-weight:400;}
+.li{display:inline-flex;align-items:center;gap:4px;}
+.ldot{width:8px;height:8px;border-radius:1px;flex-shrink:0;}
+
+/* ── CHARTS ─────────────────────────────────────────────── */
+.chart-wrap{margin:18px 0 6px;padding-top:14px;border-top:1px solid var(--rule-soft);}
+.chart-wrap:first-child{border-top:none;padding-top:0;}
+.chart-title{font-family:var(--sans);font-size:9px;font-weight:600;text-transform:uppercase;
+  letter-spacing:.18em;color:var(--muted);margin-bottom:10px;}
+.chart-note{font-family:var(--sans);font-size:10px;color:var(--muted);margin-top:8px;font-style:italic;}
+.chart-hint{font-family:var(--sans);font-size:9px;color:var(--faint,#b0a89a);margin-top:4px;font-style:italic;}
+.hbar{display:flex;align-items:center;gap:8px;margin:4px 0;font-size:10.5px;}
+.hbar-label{width:92px;text-align:right;color:var(--ink);font-weight:400;white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis;font-family:var(--sans);}
+.hbar-track{flex:1;height:10px;background:transparent;border-bottom:1px solid var(--rule-soft);
+  overflow:hidden;position:relative;}
+.hbar-fill{height:100%;border-radius:0;transition:width .4s ease;}
+.hbar-val{width:40px;font-size:9.5px;color:var(--faint);font-weight:400;font-variant-numeric:tabular-nums;}
+
+/* ── CHIPS ──────────────────────────────────────────────── */
+.chip-note{font-size:10.5px;color:var(--muted);margin-bottom:14px;line-height:1.6;}
+.chip-wrap{display:flex;flex-wrap:wrap;gap:6px;}
+.chip{padding:5px 11px;border-radius:1px;border:1px solid var(--rule);background:transparent;
+  font-family:var(--sans);font-size:10.5px;font-weight:500;cursor:pointer;
+  transition:all .2s ease;white-space:nowrap;color:var(--ink);}
+.chip:hover{border-color:var(--ink);}
+.chip.on{color:var(--panel);border-color:transparent;}
+.chip .cn{font-weight:400;color:var(--faint);font-size:9.5px;margin-left:3px;font-variant-numeric:tabular-nums;}
+.chip.on .cn{color:rgba(251,249,243,.7);}
+
+.cat-hdr{font-family:var(--sans);font-size:9px;font-weight:600;text-transform:uppercase;
+  letter-spacing:.18em;color:var(--muted);margin:16px 0 8px;padding-bottom:6px;
+  border-bottom:1px solid var(--rule-soft);cursor:pointer;user-select:none;display:flex;
+  align-items:center;gap:5px;}
+.cat-hdr:first-child{margin-top:4px;}
+.cat-hdr .cat-arrow{font-size:8px;transition:transform .2s ease;display:inline-block;}
+.cat-hdr.collapsed .cat-arrow{transform:rotate(-90deg);}
+.cat-hdr .cat-count{font-weight:400;color:var(--faint);margin-left:auto;font-size:9px;
+  letter-spacing:.05em;font-variant-numeric:tabular-nums;}
+
+/* ── POLY SELECT ────────────────────────────────────────── */
+.poly-sel{width:100%;padding:9px 11px;border:1px solid var(--rule);border-radius:1px;
+  font-family:var(--sans);font-size:11.5px;background:var(--panel);color:var(--ink);cursor:pointer;}
+.poly-sel:focus{outline:none;border-color:var(--accent);}
+.poly-detail{margin-top:12px;font-size:11px;color:var(--muted);line-height:1.7;font-family:var(--sans);}
+.poly-detail b{color:var(--ink);font-weight:500;}
+.tdot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:3px;}
+.trow{display:inline-block;padding:1px 4px;margin:0 -4px;border-radius:2px;cursor:default;transition:background .12s ease;}
+.trow:hover{background:var(--rule);}
+
+/* ── HEX PROFILE POPUP ──────────────────────────────────── */
+.hex-profile{min-width:260px;max-width:320px;}
+.hex-profile h4{font-family:var(--serif);font-size:14px;font-weight:500;margin-bottom:8px;color:var(--ink);}
+.wc-wrap{max-height:220px;overflow-y:auto;margin:10px 0;
+  border:1px solid var(--rule);padding:6px 10px;background:var(--panel);}
+.wc-word{display:block;font-size:11.5px;color:var(--ink);padding:3px 0;
+  border-bottom:1px solid var(--rule-soft);line-height:1.4;font-family:var(--sans);}
+.wc-word:last-child{border-bottom:none;}
+.wc-dot{display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:5px;vertical-align:middle;flex-shrink:0;}
+.wc-dot-hollow{background:transparent !important;border:1.2px solid var(--muted);}
+.sem-bars{margin-top:10px;}
+.sem-bar{display:flex;align-items:center;gap:5px;margin:3px 0;font-size:10px;}
+.sem-bar-label{width:68px;text-align:right;color:var(--muted);font-size:9.5px;}
+.sem-bar-track{flex:1;height:8px;background:transparent;border-bottom:1px solid var(--rule-soft);overflow:hidden;}
+.sem-bar-fill{height:100%;}
+
+.bar-wrap{display:flex;height:6px;overflow:hidden;margin:5px 0;width:100%;
+  border:1px solid var(--rule-soft);}
+.bar-seg{height:100%;}
+
+/* ── LEAFLET OVERRIDES ──────────────────────────────────── */
+.type-tip{background:var(--ink)!important;color:var(--panel)!important;border:none!important;
+  border-radius:0!important;font-size:10px!important;font-family:var(--sans)!important;
+  padding:4px 8px!important;box-shadow:none!important;letter-spacing:.02em;}
+.type-tip::before{display:none!important;}
+.leaflet-popup-content-wrapper{border-radius:0;box-shadow:0 2px 16px rgba(26,29,38,.08);
+  font-family:var(--sans);border:1px solid var(--rule);background:var(--panel);}
+.leaflet-popup-content{font-size:12px;line-height:1.6;margin:12px 14px;color:var(--ink);}
+.leaflet-popup-tip{background:var(--panel);border:1px solid var(--rule);}
+.pb{font-family:var(--serif);font-weight:500;color:var(--ink);font-size:13px;}
+.pt{color:var(--muted);font-size:10.5px;}
+
+/* ── WARM BASEMAP FILTER ────────────────────────────────── */
+/* Aegean wash: pushes CARTO Positron toward parchment/ochre land + soft teal sea */
+.leaflet-tile-pane{filter:sepia(.12) saturate(.72) brightness(1.03) contrast(.95);}
+
+/* ── ODDITIES LIST ─────────────────────────────────────── */
+.odd-row{display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid var(--bdr);
+  font-size:11px;cursor:default;transition:background .12s ease;border-radius:2px;}
+.odd-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.odd-name{font-weight:600;}
+.odd-gloss{color:var(--muted);font-style:italic;flex:1;}
+.odd-count{color:var(--faint);font-size:10px;}
+
+/* ── ETYMOLOGY INLINE DOTS ─────────────────────────────── */
+.etym-dot{display:inline-block;width:6px;height:6px;border-radius:50%;margin-left:4px;vertical-align:middle;}
+.conf-lbl{font-size:0.85em;}
+
+/* ── ETYM NOTE ──────────────────────────────────────────── */
+.conf-legend{display:flex;align-items:center;gap:12px;font-family:var(--sans);font-size:10px;
+  color:var(--muted);margin-top:10px;padding:6px 0;}
+.conf-title{font-weight:600;font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:var(--ink);}
+.conf-item{display:inline-flex;align-items:center;gap:4px;}
+.conf-dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+.conf-h{background:#22c55e;}
+.conf-m{background:#eab308;}
+.conf-l{background:#ef4444;}
+.etym-note{font-size:10px;color:var(--muted);margin-top:14px;line-height:1.65;padding:10px 12px;
+  background:transparent;border:none;border-top:1px solid var(--rule-soft);border-radius:0;
+  font-style:italic;font-family:var(--serif);font-weight:400;}
+.etym-note b{color:var(--ink);font-style:normal;font-family:var(--sans);font-size:9px;
+  text-transform:uppercase;letter-spacing:.14em;font-weight:600;font-style:normal;}
+
+/* ── INFO BUTTON + MODAL ──────────────────────────────────── */
+.hdr-title-row{display:flex;align-items:center;gap:10px;}
+.info-btn{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--rule);background:transparent;
+  font-family:var(--serif);font-size:12px;font-style:italic;font-weight:400;color:var(--muted);
+  cursor:pointer;transition:all .2s ease;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  line-height:1;padding:0;}
+.info-btn:hover{border-color:var(--accent);color:var(--accent);}
+
+.info-overlay{display:none;position:fixed;inset:0;z-index:9000;background:rgba(26,29,38,.45);
+  align-items:center;justify-content:center;padding:24px;}
+.info-overlay.open{display:flex;}
+.info-modal{background:var(--panel);border:1px solid var(--rule);max-width:560px;width:100%;
+  max-height:calc(100vh - 48px);overflow-y:auto;position:relative;padding:36px 32px 32px;
+  box-shadow:0 8px 40px rgba(26,29,38,.12);}
+.info-modal::-webkit-scrollbar{width:6px;}
+.info-modal::-webkit-scrollbar-thumb{background:var(--rule);border-radius:0;}
+.info-close{position:absolute;top:12px;right:14px;background:none;border:none;font-size:22px;
+  color:var(--muted);cursor:pointer;line-height:1;padding:4px;transition:color .2s ease;}
+.info-close:hover{color:var(--ink);}
+.info-body h2{font-family:var(--serif);font-size:20px;font-weight:400;margin-bottom:4px;color:var(--ink);}
+.info-body .info-version{font-size:10px;color:var(--faint);margin-bottom:3px;font-family:var(--sans);}
+.info-body .info-author{font-size:11px;color:var(--muted);margin-bottom:4px;}
+.info-body .info-license{font-size:10px;color:var(--faint);margin-bottom:18px;font-family:var(--sans);}
+.info-body h3{font-family:var(--sans);font-size:9px;font-weight:600;text-transform:uppercase;
+  letter-spacing:.16em;color:var(--muted);margin:18px 0 8px;padding-bottom:5px;
+  border-bottom:1px solid var(--rule-soft);}
+.info-body p{font-size:11.5px;line-height:1.7;color:var(--ink);margin-bottom:10px;font-family:var(--sans);}
+.info-body ul{font-size:11px;line-height:1.7;color:var(--ink);margin:0 0 10px 16px;font-family:var(--sans);}
+.info-body li{margin-bottom:3px;}
+.info-body a{color:var(--accent);text-decoration:none;}
+.info-body a:hover{text-decoration:underline;}
+.info-body .info-warn{font-size:10.5px;line-height:1.65;color:var(--muted);font-style:italic;
+  padding:10px 12px;border-top:1px solid var(--rule-soft);margin-top:18px;font-family:var(--serif);}
+
+</style>
+</head>
+<body>
+
+<div id="panel">
+  <div class="hdr">
+    <div class="hdr-title-row"><h1 data-i="title">Greek Toponymic Atlas</h1><button class="info-btn" id="info-btn" title="About this atlas">i</button></div>
+    <div class="hdr-ctrls">
+      <div class="filter-toggle">
+        <button class="fbtn on" data-filter="all" data-i="f_all">All</button>
+        <button class="fbtn" data-filter="urb" data-i="f_urb">Urban</button>
+        <button class="fbtn" data-filter="rur" data-i="f_rur">Rural</button>
+      </div>
+      <button class="lang-btn" id="lang-btn">Ελληνικά</button>
+    </div>
+  </div>
+  <div class="tabs">
+    <div class="tab on" data-tab="maps" data-i="tab_maps">Naming</div>
+    <div class="tab" data-tab="modif" data-i="tab_modif">Modifiers</div>
+    <div class="tab" data-tab="saints" data-i="tab_saints">Sacred Names</div>
+    <div class="tab" data-tab="poly" data-i="tab_poly">Polymorphism</div>
+    <div class="tab" data-tab="etym" data-i="tab_etym">Origins</div>
+    <div class="tab" data-tab="odd" data-i="tab_odd">Oddities</div>
+  </div>
+
+  <!-- TAB: NAMING -->
+  <div class="pane on" id="pane-maps">
+    <div class="lcard on" data-layer="sem"><div class="lcard-row">
+      <div class="sw sw-cat"><svg viewBox="0 0 24 24"><path d="M12 12 L12 2 A10 10 0 0 1 20.66 17 Z" fill="#1e3a5f"/><path d="M12 12 L20.66 17 A10 10 0 0 1 3.34 17 Z" fill="#b34a2c"/><path d="M12 12 L3.34 17 A10 10 0 0 1 8 3.34 Z" fill="#6b8e4e"/><path d="M12 12 L8 3.34 A10 10 0 0 1 12 2 Z" fill="#c9963c"/></svg></div>
+      <div><div class="ln" data-i="l_sem">What Names Are About</div>
+        <div class="ld-desc" data-i="d_sem">Dominant naming theme per area</div></div></div>
+      <div class="leg" id="sem-leg"></div>
+    </div>
+    <div class="lcard" data-layer="sem_ent"><div class="lcard-row">
+      <div class="sw"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="7" opacity=".55"/><circle cx="12" cy="12" r="11" opacity=".25"/></svg></div>
+      <div><div class="ln" data-i="l_sem_ent">Thematic Diversity</div>
+        <div class="ld-desc" data-i="d_sem_ent">How evenly spread are naming themes across categories?</div></div></div>
+      <div class="leg"><span class="li"><span class="ldot" style="background:#f4f1ea;border:1px solid #d9d3c7"></span><span data-i="mono">Mono-thematic</span></span>
+        <span class="li"><span class="ldot" style="background:#264856"></span><span data-i="multi">Multi-thematic</span></span></div>
+    </div>
+
+    <div class="chart-wrap" id="chart-sem"></div>
+    <div class="chart-wrap" id="chart-topnames"></div>
+  </div>
+
+  <!-- TAB: MODIFIERS -->
+  <div class="pane" id="pane-modif">
+    <div class="lcard on" data-layer="pfx_all"><div class="lcard-row">
+      <div class="sw"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="5" width="16" height="3" opacity=".3"/><rect x="4" y="10.5" width="12" height="3" opacity=".6"/><rect x="4" y="16" width="8" height="3"/></svg></div>
+      <div><div class="ln" data-i="l_pall">All Modifiers</div>
+        <div class="ld-desc" data-i="d_pall">% of names with any modifier</div></div></div></div>
+    <div class="lcard" data-layer="pfx_neo"><div class="lcard-row">
+      <div class="sw"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21 V7 M6.5 12.5 L12 7 L17.5 12.5"/><path d="M5 21 H19" opacity=".5"/></svg></div>
+      <div><div class="ln" data-i="l_neo">Νέο — "New"</div>
+        <div class="ld-desc" data-i="d_neo">Resettlement, refugee villages (post-1922)</div></div></div></div>
+    <div class="lcard" data-layer="pfx_pal"><div class="lcard-row">
+      <div class="sw"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4 H18 M6 20 H18 M7 4 C7 10 17 14 17 20 M17 4 C17 10 7 14 7 20"/></svg></div>
+      <div><div class="ln" data-i="l_pal">Παλαιό — "Old"</div>
+        <div class="ld-desc" data-i="d_pal">Abandoned or renamed settlements</div></div></div></div>
+    <div class="lcard" data-layer="pfx_ano"><div class="lcard-row">
+      <div class="sw"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 14 L12 7 L19 14"/><path d="M5 20 L12 13 L19 20" opacity=".45"/></svg></div>
+      <div><div class="ln" data-i="l_ano">Άνω — "Upper"</div>
+        <div class="ld-desc" data-i="d_ano">Upper half of split settlements</div></div></div></div>
+    <div class="lcard" data-layer="pfx_kat"><div class="lcard-row">
+      <div class="sw"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4 L12 11 L19 4" opacity=".45"/><path d="M5 10 L12 17 L19 10"/></svg></div>
+      <div><div class="ln" data-i="l_kat">Κάτω — "Lower"</div>
+        <div class="ld-desc" data-i="d_kat">Lower half of split settlements</div></div></div></div>
+    <div class="lcard" data-layer="pfx_meg"><div class="lcard-row">
+      <div class="sw"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="9" cy="12" r="8"/><circle cx="19" cy="12" r="3" opacity=".45"/></svg></div>
+      <div><div class="ln" data-i="l_meg">Μεγάλο — "Big"</div>
+        <div class="ld-desc" data-i="d_meg">Larger of a size pair</div></div></div></div>
+    <div class="lcard" data-layer="pfx_mik"><div class="lcard-row">
+      <div class="sw"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="15" cy="12" r="8" opacity=".45"/><circle cx="5" cy="12" r="3"/></svg></div>
+      <div><div class="ln" data-i="l_mik">Μικρό — "Small"</div>
+        <div class="ld-desc" data-i="d_mik">Smaller of a size pair</div></div></div></div>
+    <div class="chart-wrap" id="chart-mods"></div>
+  </div>
+
+  <!-- TAB: SACRED NAMES -->
+  <div class="pane" id="pane-saints">
+    <p class="chip-note" data-i="saints_note">Toggle sacred names to map their geographic spread across Greece.</p>
+    <div id="sacred-groups"></div>
+  </div>
+
+  <!-- TAB: POLYMORPHISM -->
+  <div class="pane" id="pane-poly">
+    <p class="chip-note" data-i="poly_note">Names appearing as many different feature types — ranked by how evenly spread, not just frequency.</p>
+    <select class="poly-sel" id="poly-sel"><option value="" data-i="poly_ph">— Select a name —</option></select>
+    <div class="poly-detail" id="poly-detail"></div>
+  </div>
+
+  <!-- TAB: ORIGINS -->
+  <div class="pane" id="pane-etym">
+    <div class="lcard on" data-layer="etym_div"><div class="lcard-row">
+      <div class="sw"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="9" cy="9" r="6"/><circle cx="15" cy="15" r="6" opacity=".55"/><circle cx="15" cy="9" r="4" opacity=".3"/></svg></div>
+      <div><div class="ln" data-i="l_ediv">Naming Layer Diversity</div>
+        <div class="ld-desc" data-i="d_ediv">How many distinct linguistic origins are present?</div></div></div>
+      <div class="leg"><span class="li"><span class="ldot" style="background:#f4f1ea;border:1px solid #d9d3c7"></span><span data-i="onlygk">Only Greek</span></span>
+        <span class="li"><span class="ldot" style="background:#8a7658"></span><span data-i="highdiv">More diverse</span></span></div>
+    </div>
+    <div class="chart-wrap" id="chart-etym"></div>
+    <div class="conf-legend">
+      <span class="conf-title" data-i="conf_title">Classification confidence</span>
+      <span class="conf-item"><span class="conf-dot conf-h"></span><span data-i="conf_high">High</span></span>
+      <span class="conf-item"><span class="conf-dot conf-m"></span><span data-i="conf_med">Medium</span></span>
+      <span class="conf-item"><span class="conf-dot conf-l"></span><span data-i="conf_low">Low</span></span>
+    </div>
+    <div class="etym-note"><b data-i="enote_t">Note:</b> <span data-i="enote_b">This map shows the diversity of place names by most probable linguistic origin. It is not an indication of the ethnic, linguistic, or religious composition of present-day populations. See Info for more.</span></div>
+  </div>
+
+  <!-- TAB: ODDITIES -->
+  <div class="pane" id="pane-odd">
+    <p class="chip-note" data-i="odd_note">Curated collection of Greece's most colourful place names. Toggle categories to explore.</p>
+    <div class="chip-wrap" id="odd-chips"></div>
+    <div id="odd-list" style="margin-top:12px;"></div>
+  </div>
+</div>
+
+<div id="map"></div>
+<div id="loading" style="position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:var(--bg);">
+  <p style="font-family:Inter,system-ui,sans-serif;color:var(--muted);font-size:14px;">Loading atlas data&hellip;</p>
+</div>
+
+<div class="info-overlay" id="info-overlay">
+  <div class="info-modal">
+    <button class="info-close" id="info-close">&times;</button>
+    <div class="info-body" id="info-body"></div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js" integrity="sha512-puJW3E/qXDqYp9IfhAI54BJEaWIfloJ7JWs7OeD5i6ruC9JZL1gERT1wjtwXFlh7CjE7ZJ+/vcRZRkIYIb6p4g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script>
+// ── DATA (loaded from external JSON) ─────────────────────────
+const DATA_FILES = {
+  ENT:'data/ent.json', SEM:'data/sem.json',
+  PREFIX:'data/prefix.json', ETYM:'data/etym.json', HAGIO:'data/hagio.json',
+  POLY:'data/poly.json', PROFILES:'data/profiles.json', CHARTS:'data/charts.json',
+  ODD:'data/oddnames.json'
+};
+
+const _v='v15';
+Promise.all(
+  Object.entries(DATA_FILES).map(([k,url]) =>
+    fetch(url+'?'+_v).then(r => { if(!r.ok) throw new Error('Failed to load '+url); return r.json(); })
+              .then(d => [k, d])
+  )
+).then(entries => {
+const D = Object.fromEntries(entries);
+document.getElementById('loading').remove();
+
+// ── constants.js ──
+// ── constants.js ─────────────────────────────────────────────
+// Pure data: D destructure, colour palettes, lookup tables.
+// No functions, no DOM, no side-effects.
+
+// Destructure loaded JSON data into module-scope variables
+const {ENT, SEM, PREFIX, ETYM, HAGIO, POLY, PROFILES, CHARTS, ODD} = D;
+
+// Semantic category colours — Aegean Academic, meaning-matched
+const SEM_COLORS={religious:'#1e3a5f',anthroponym:'#b34a2c',geomorphic:'#7a6548',flora:'#6b8e4e',
+  fauna:'#c9963c',hydro:'#4a7c8a',colour:'#c49090',ethnic:'#7a3a4a',occupation:'#8a7224',
+  descriptive_other:'#8a8a94',built:'#b09478',transport:'#6b5b73',opaque:'#e8e2d4'};
+const SEM_LABELS={religious:'Religious',anthroponym:'Place/People',geomorphic:'Landforms',flora:'Flora',
+  fauna:'Fauna',hydro:'Water',colour:'Colours',ethnic:'Ethnic',occupation:'Occupations',
+  descriptive_other:'Descriptive',built:'Built',transport:'Transport',opaque:'Opaque'};
+const SEM_LABELS_GR={religious:'Θρησκευτικά',anthroponym:'Τόποι/Πρόσωπα',geomorphic:'Γεωμορφικά',flora:'Χλωρίδα',
+  fauna:'Πανίδα',hydro:'Υδατικά',colour:'Χρώματα',ethnic:'Εθνωνύμια',occupation:'Επαγγέλματα',
+  descriptive_other:'Περιγραφικά',built:'Κτίσματα',transport:'Μεταφορές',opaque:'Αδιαφανή'};
+
+// Feature type colours (used by poly, sacred, oddities layers) — Aegean palette, grouped to minimise confusion
+const TYPE_COLORS={
+  'Chapel':'#c17a3c','Church':'#c17a3c','Monastery':'#c17a3c','Iconostasis':'#c17a3c',
+  'Toponym':'#b34a2c','Other Built Up Places':'#b34a2c','Municipality':'#b34a2c','Administrative Capital':'#b34a2c',
+  'Peak':'#7a6548','Ridge':'#7a6548','Mountain':'#7a6548','Hill':'#7a6548','Buttress':'#7a6548',
+  'Stream':'#4a7c8a','Fountain':'#4a7c8a','Spring':'#4a7c8a','River':'#4a7c8a',
+  'Bay':'#1e3a5f','Cove':'#1e3a5f','Point':'#1e3a5f',
+  'Rocky Islet':'#9a958a','Rock':'#9a958a','Islet':'#9a958a'};
+const TYPE_LEGEND={'#b34a2c':'Settlement','#c17a3c':'Religious','#7a6548':'Mountain','#4a7c8a':'Water','#1e3a5f':'Coastal','#9a958a':'Rocky','#6b5b73':'Other'};
+
+// Feature type labels (Greek) — used by tType() and tLegType() in i18n.js
+const TYPE_COLORS_GR={
+  'Chapel':'Παρεκκλήσιο','Church':'Εκκλησία','Monastery':'Μοναστήρι','Iconostasis':'Εικονοστάσι',
+  'Toponym':'Τοπωνύμιο','Other Built Up Places':'Οικισμός','Municipality':'Δήμος',
+  'Administrative Capital':'Πρωτεύουσα','Area':'Περιοχή',
+  'Peak':'Κορυφή','Ridge':'Ράχη','Mountain':'Βουνό','Hill':'Λόφος','Buttress':'Πλευρά','Hillside':'Πλαγιά',
+  'Stream':'Ρέμα','Fountain':'Βρύση','Spring':'Πηγή','River':'Ποταμός','Lake':'Λίμνη',
+  'Bay':'Κόλπος','Cove':'Όρμος','Point':'Ακρωτήριο','Coast':'Ακτή','Anchorage':'Αγκυροβόλιο',
+  'Port':'Λιμάνι','Pier':'Προβλήτα','Breakwater':'Μώλος',
+  'Rocky Islet':'Βραχονησίδα','Rock':'Βράχος','Islet':'Νησίδα','Islets':'Νησίδες',
+  'Reef':'Ύφαλος','Reefs':'Ύφαλοι','Undersea Mound':'Υποθαλάσσιο Ύψωμα',
+  'Fish farm':'Ιχθυοτροφείο','Bridge':'Γέφυρα','Cemetary':'Νεκροταφείο'
+};
+const TYPE_LEGEND_GR={'#b34a2c':'Οικισμός','#c17a3c':'Θρησκευτικό','#7a6548':'Βουνό','#4a7c8a':'Νερό','#1e3a5f':'Παραλία','#9a958a':'Βράχος','#6b5b73':'Άλλο'};
+
+// Etymology reverse lookup (data key → display name)
+const ETYM_REV={gk:'Greek',tk:'Turkish/Ottoman',sl:'Slavic',mx:'Mixed/Compound',vn:'Venetian/Italian',al:'Albanian',un:'Unknown'};
+
+// Etymology display colours — single source of truth
+const ETYM_COLORS={Greek:'#1e3a5f','Turkish/Ottoman':'#b34a2c',Slavic:'#6b8e4e','Mixed/Compound':'#6b5b73',
+  'Venetian/Italian':'#c17a3c',Albanian:'#4a7c8a',Unknown:'#9a958a'};
+// Etymology display key → data key mapping
+const ETYM_KEY_MAP={Greek:'gk','Turkish/Ottoman':'tk',Slavic:'sl','Mixed/Compound':'mx',
+  'Venetian/Italian':'vn',Albanian:'al',Unknown:'un'};
+
+// ── SHARED MUTABLE STATE ─────────────────────────────────────
+// Declared here so every concatenated module shares the same binding.
+//
+//  Variable      Type      Written by            Read by
+//  ─────────     ────      ──────────            ───────
+//  lang          string    main.js (lang toggle) t(), semLabel(), all i18n helpers
+//  FILTER        string    main.js (filter btns) layer builders, sacred, poly, oddities
+//  map           L.Map     main.js (init)        layers, charts, sacred
+//  activeLayer   string    main.js (tab/card)    main.js, charts
+//  sacredState   object    sacred.js (init)      sacred.js, main.js
+//  polySelect    Element   poly.js (init)        poly.js
+//  polyDetail    Element   poly.js (init)        poly.js
+//
+// Data aliases (written once from D, read everywhere):
+//  ENT, SEM, PREFIX, ETYM, HAGIO, POLY, PROFILES, CHARTS, ODD
+let lang='en';
+let FILTER='all';
+
+// Classify place name → semantic category (regex heuristic, client-side)
+function classifyName(n){
+  if(/^(Άγι|Αγί|Παναγ|Προφήτ|Ανάληψ|Μεταμόρφωσ|Τίμιος|Χριστ|Σταυρ|Ανάστασ|Εισόδια|Εισοδίων|Τριάδ|Κοίμησ|Γενέθλιο|Εικονοστ|Μονή|Μοναστ|Ναός|Εκκλησ|Εξωκκλ|Παρεκκλ|Θεοτόκ)/.test(n))return'religious';
+  if(/^(Βρύσ|Πηγ|Ποταμ|Ρέμ|Ρέμα|Λίμν|Λάκκ|Γκιόλ)/.test(n))return'hydro';
+  if(/^(Κορυφ|Ράχ|Βουν|Λόφ|Πλαγ|Πλευρ|Κάμπ|Πεδιάδ|Κοιλάδ|Φαράγγ|Βάλτ|Πετρ|Βράχ|Γκρεμ|Σπηλ)/.test(n))return'geomorphic';
+  if(/^(Ελι|Ελαι|Πλάταν|Δέντρ|Καρυ|Πεύκ|Ροδ|Δάσ|Άλσ|Λειβάδ|Λιβάδ|Λόγγ)/.test(n))return'flora';
+  return null;
+}
+
+// ── i18n.js ──
+// ── i18n.js ───────────────────────────────────────────────────
+// Translation system: I18N table, lang/FILTER state, all t*() helpers.
+
+const I18N = {
+  en: {
+    title:'Greek Toponymic Atlas', sub:'National Gazetteer',
+    tab_maps:'Naming', tab_modif:'Modifiers', tab_saints:'Sacred Names', tab_poly:'Polymorphism', tab_etym:'Origins', tab_odd:'Oddities',
+    odd_note:'Curated collection of Greece\'s most colourful place names. Toggle categories to explore.',
+    odd_vulgar:'Vulgar', odd_dark:'Dark & Eerie', odd_rogue:'Rogues', odd_animal:'Animals', odd_household:'Household', odd_stinky:'Stinky',
+    l_ent:'Toponymic Diversity', d_ent:'How many distinct place names per area?',
+    l_sem:'What Place Names Refer To', d_sem:'Dominant naming theme per area',
+    l_sem_ent:'Thematic Diversity', d_sem_ent:'How evenly spread are naming themes across categories?',
+    mono:'Mono-thematic', multi:'Multi-thematic',
+    rep:'Repetitive', div:'Diverse', vdiv:'Very diverse',
+    l_pall:'All Modifiers', d_pall:'% of names with any modifier',
+    l_neo:'Νέο — "New"', d_neo:'Resettlement, refugee villages (post-1922)',
+    l_pal:'Παλαιό — "Old"', d_pal:'Abandoned or renamed settlements',
+    l_ano:'Άνω — "Upper"', d_ano:'Upper part of a settlement pair',
+    l_kat:'Κάτω — "Lower"', d_kat:'Lower part of a settlement pair',
+    l_meg:'Μεγάλο — "Big"', d_meg:'The larger of two same-named settlements',
+    l_mik:'Μικρό — "Small"', d_mik:'The smaller of two same-named settlements',
+    saints_note:'Toggle sacred names to map their geographic spread across Greece.',
+    cat_saints:'Saints', cat_theotokos:'Virgin Mary', cat_prophets:'Prophets',
+    cat_archangels:'Archangels', cat_feasts:'Feasts & Cross', cat_structures:'Church Structures', cat_other_religious:'Other Sacred',
+    poly_note:'Names appearing as many different feature types — ranked by how evenly spread, not just frequency.',
+    poly_ph:'— Select a name —',
+    l_ediv:'Linguistic Origin', d_ediv:'How many distinct linguistic roots are present?',
+    onlygk:'Only Greek', highdiv:'More diverse',
+    enote_t:'Note:', enote_b:'This map shows the diversity of place names by most probable linguistic origin. It is not an indication of the ethnic, linguistic, or religious composition of present-day populations. Hexagons are a spatial analysis unit and do not indicate or imply territorial claims. See Info for more.',
+    ct_sem:'Thematic Categories', ct_top:'Most Common Place Names', ct_mods:'Modifier Counts', ct_etym:'Etymology',
+    p_div_h:'Toponymic diversity', p_unique:'distinct place names out of', p_features:'features',
+    p_unique_pct:'place names unique to this area',
+    p_mainly:'Mainly', p_names:'', p_themes:'Top themes',
+    p_unclear:'with unclear meaning', p_ftotal:'features total',
+    p_mod_pct:'of names carry a modifier',
+    p_mod_names:'names with modifiers',
+    p_neo_sig:'Marks resettled or newly founded villages',
+    p_pal_sig:'Marks abandoned sites or renamed villages',
+    p_ano_sig:'Upper part of a settlement pair',
+    p_kat_sig:'Lower part of a settlement pair',
+    p_meg_sig:'The larger of two same-named settlements',
+    p_mik_sig:'The smaller of two same-named settlements',
+    p_ldiv_score:'Linguistic diversity score',
+    p_norigins:'linguistic origins',
+    p_common:'most common',
+    hp_title:'Hex Profile', hp_names:'Top Names', hp_sem:'Thematic Breakdown',
+    f_all:'All', f_urb:'Urban', f_rur:'Rural',
+    conf_title:'Classification confidence', conf_high:'High', conf_med:'Medium', conf_low:'Low',
+    langbtn:'Ελληνικά',
+  },
+  gr: {
+    title:'Ελληνικός Τοπωνυμικός Άτλας', sub:'Εθνικό Μητρώο Γεωγραφικών Ονομάτων',
+    tab_maps:'Ονόματα', tab_modif:'Προσδιορ.', tab_saints:'Ιερωνύμια', tab_poly:'Πολυμορφία', tab_etym:'Προέλευση', tab_odd:'Περίεργα',
+    odd_note:'Επιλεγμένη συλλογή με τα πιο χρωματιστά τοπωνύμια της Ελλάδας. Ενεργοποιήστε κατηγορίες για εξερεύνηση.',
+    odd_vulgar:'Χυδαία', odd_dark:'Σκοτεινά', odd_rogue:'Κατεργάρηδες', odd_animal:'Ζώα', odd_household:'Οικιακά', odd_stinky:'Βρωμιάρηδες',
+    l_ent:'Τοπωνυμική Ποικιλότητα', d_ent:'Πόσα διαφορετικά τοπωνύμια υπάρχουν ανά περιοχή;',
+    l_sem:'Τι Περιγράφουν τα Τοπωνύμια', d_sem:'Κυρίαρχη θεματική κατηγορία ανά περιοχή',
+    l_sem_ent:'Θεματική Ποικιλότητα', d_sem_ent:'Πόσο ισόρροπα κατανέμονται οι θεματικές κατηγορίες;',
+    mono:'Μονοθεματικό', multi:'Πολυθεματικό',
+    rep:'Επαναληπτικό', div:'Ποικίλο', vdiv:'Πολύ ποικίλο',
+    l_pall:'Όλοι οι Προσδιορισμοί', d_pall:'% ονομάτων με προσδιορισμό',
+    l_neo:'Νέο', d_neo:'Επανεγκατάσταση, προσφυγικοί οικισμοί (μετά το 1922)',
+    l_pal:'Παλαιό', d_pal:'Εγκαταλελειμμένοι ή μετονομασμένοι οικισμοί',
+    l_ano:'Άνω', d_ano:'Άνω τμήμα ζεύγους οικισμών',
+    l_kat:'Κάτω', d_kat:'Κάτω τμήμα ζεύγους οικισμών',
+    l_meg:'Μεγάλο', d_meg:'Ο μεγαλύτερος από δύο ομώνυμους οικισμούς',
+    l_mik:'Μικρό', d_mik:'Ο μικρότερος από δύο ομώνυμους οικισμούς',
+    saints_note:'Εναλλαγή ιερωνυμίων για χαρτογράφηση της γεωγραφικής τους εξάπλωσης.',
+    cat_saints:'Άγιοι', cat_theotokos:'Θεοτόκος', cat_prophets:'Προφήτες',
+    cat_archangels:'Αρχάγγελοι', cat_feasts:'Εορτές & Σταυρός', cat_structures:'Εκκλ. Κτίσματα', cat_other_religious:'Λοιπά Ιερά',
+    poly_note:'Τοπωνύμια που αντιστοιχούν σε πολλούς τύπους χαρακτηριστικών — κατανεμημένα ισόρροπα.',
+    poly_ph:'— Επιλέξτε όνομα —',
+    l_ediv:'Γλωσσική προέλευση', d_ediv:'Πόσες διαφορετικές γλωσσικές ρίζες υπάρχουν;',
+    onlygk:'Μόνο ελληνικά', highdiv:'Μεγαλύτερη ποικιλότητα',
+    enote_t:'Σημείωση:', enote_b:'O χάρτης καταγράφει την ποικιλία των τοπωνυμίων με βάση την πιθανότερη γλωσσική προέλευση. Δεν αποτελεί ένδειξη εθνοτικής, γλωσσικής ή θρησκευτικής σύνθεσης σημερινών πληθυσμών. Τα εξάγωνα αποτελούν μονάδα χωρικής ανάλυσης και δεν υποδηλώνουν εδαφικές διεκδικήσεις. Δείτε περισσότερα στις πληροφορίες.',
+    ct_sem:'Θεματικές Κατηγορίες', ct_top:'Συχνότερα Τοπωνύμια', ct_mods:'Πλήθος Προσδιορισμών', ct_etym:'Ετυμολογία',
+    p_div_h:'Τοπωνυμική ποικιλότητα', p_unique:'μοναδικά τοπωνύμια σε', p_features:'χαρακτηριστικά',
+    p_unique_pct:'από τα τοπωνύμια μοναδικά εδώ',
+    p_mainly:'Κυρίως', p_names:'', p_themes:'Θεματικές',
+    p_unclear:'με ασαφή ονομασία', p_ftotal:'τοπωνύμια',
+    p_mod_pct:'ονομάτων με προσδιορισμό',
+    p_mod_names:'τοπωνύμια με προσδιορισμό',
+    p_neo_sig:'Νεοϊδρυθέντες ή μετεγκατεστημένοι οικισμοί',
+    p_pal_sig:'Εγκαταλελειμμένα ή μετονομασμένα',
+    p_ano_sig:'Άνω τμήμα ζεύγους οικισμών',
+    p_kat_sig:'Κάτω τμήμα ζεύγους οικισμών',
+    p_meg_sig:'Ο μεγαλύτερος από δύο ομώνυμους οικισμούς', p_mik_sig:'Ο μικρότερος από δύο ομώνυμους οικισμούς',
+    p_ldiv_score:'Γλωσσική ποικιλότητα',
+    p_norigins:'γλωσσικές ρίζες',
+    p_common:'συχνότερο',
+    hp_title:'Προφίλ Περιοχής', hp_names:'Κυριότερα Ονόματα', hp_sem:'Θεματική Κατανομή',
+    f_all:'Όλα', f_urb:'Αστικά', f_rur:'Αγροτικά',
+    conf_title:'Βεβαιότητα ταξινόμησης', conf_high:'Υψηλή', conf_med:'Μέτρια', conf_low:'Χαμηλή',
+    langbtn:'English',
+  }
+};
+// lang and FILTER declared in constants.js (shared mutable state)
+function t(k){ const v=I18N[lang][k]; return v!==undefined?v:k; }
+
+const LBL_EN={
+  'too few names to assess':'too few names to assess',
+  'low diversity — some repetition':'low diversity — some repetition',
+  'low diversity — moderate repetition':'low diversity — moderate repetition',
+  'moderate diversity':'moderate diversity',
+  'high diversity':'high diversity',
+  'very high diversity':'very high diversity'
+};
+const LBL_GR={
+  'too few names to assess':'πολύ λίγα δεδομένα',
+  'low diversity — some repetition':'χαμηλή τοπωνυμική ποικιλότητα',
+  'low diversity — moderate repetition':'χαμηλή τοπωνυμική ποικιλότητα — επανάληψη',
+  'moderate diversity':'μέτρια τοπωνυμική ποικιλότητα',
+  'high diversity':'υψηλή τοπωνυμική ποικιλότητα',
+  'very high diversity':'πολύ υψηλή τοπωνυμική ποικιλότητα'
+};
+function translateLabel(s){ return lang==='gr'?(LBL_GR[s]||s):(s); }
+
+const INTERP_GR={
+  'Settlements and landscape named with similar diversity':'Οικισμοί και τοπίο με παρόμοια ποικιλότητα',
+  'Landscape features have more varied naming here':'Το τοπίο έχει μεγαλύτερη τοπωνυμική ποικιλότητα',
+  'Settlements have more varied naming here':'Οι οικισμοί έχουν μεγαλύτερη τοπωνυμική ποικιλότητα'
+};
+function tInterp(s){ return lang==='gr'?(INTERP_GR[s]||s):(s); }
+
+// Semantic label translation (uses SEM_LABELS/SEM_LABELS_GR from constants.js)
+function semLabel(k){return lang==='gr'?(SEM_LABELS_GR[k]||k):(SEM_LABELS[k]||k);}
+
+// Feature type and etymology translations (use TYPE_COLORS_GR/TYPE_LEGEND_GR/TYPE_LEGEND/ETYM_REV from constants.js)
+function tType(s){ return lang==='gr'?(TYPE_COLORS_GR[s]||s):(s); }
+function tLegType(c){ return lang==='gr'?(TYPE_LEGEND_GR[c]||TYPE_LEGEND[c]||c):(TYPE_LEGEND[c]||c); }
+const ETYM_GR={
+  'Greek':'Ελληνική','Turkish/Ottoman':'Τουρκο-οθωμανική','Slavic':'Σλαβική',
+  'Mixed':'Μικτή','Mixed/Compound':'Μικτή','Venetian':'Βενετσιάνικη',
+  'Venetian/Italian':'Βενετσιάνικη','Albanian':'Αλβανική','Unknown':'Άγνωστη'
+};
+function tEtym(s){ return lang==='gr'?(ETYM_GR[s]||s):(s); }
+const CONF_EN  = {h:'high', m:'med', l:'low'};
+const CONF_GR  = {h:'υψηλή', m:'μέτρια', l:'χαμηλή'};
+const CONF_COL = {h:'#22c55e', m:'#eab308', l:'#ef4444'};
+
+function confLbl(c) {
+  const txt = lang === 'gr' ? CONF_GR[c] : CONF_EN[c];
+  if (!txt) return '';
+  return `<span class="conf-lbl" style="color:${CONF_COL[c]}">${txt}</span>`;
+}
+function formatNonGreek(ngl){if(!ngl||!ngl.length) return '';
+  const confDot=c=>{const col={h:'#22c55e',m:'#eab308',l:'#ef4444'};return col[c]?`<span class="etym-dot" style="background:${col[c]}"></span>`:''};
+  return '<br>'+ngl.map(r=>`${esc(r[0])}: ${esc(tEtym(ETYM_REV[r[1]]||r[1]))}${confDot(r[2])}`).join('<br>');}
+
+function applyLang(){
+  document.documentElement.lang=lang==='gr'?'el':'en';
+  document.querySelectorAll('[data-i]').forEach(el=>{
+    const k=el.dataset.i;
+    if(I18N[lang][k]) el.textContent=I18N[lang][k];
+  });
+  document.getElementById('lang-btn').textContent=t('langbtn');
+  updateSemLeg();
+  buildCharts();
+  renderOddList();
+  // rebuild poly select options with translated type counts
+  const pSel2=document.getElementById('poly-sel');
+  const curVal=pSel2.value;
+  Array.from(pSel2.options).forEach(opt=>{
+    if(opt.value&&POLY[opt.value]){
+      const info=POLY[opt.value];
+      opt.textContent=`${opt.value} (${info.n_types} ${lang==='gr'?'τύποι':'types'} · ${Math.round(info.norm_entropy*100)}%)`;
+    }
+  });
+  pSel2.value=curVal;
+  if(curVal) pSel2.dispatchEvent(new Event('change'));
+  // refresh info modal if open
+  if(document.getElementById('info-overlay').classList.contains('open'))
+    document.getElementById('info-body').innerHTML=buildInfoContent();
+}
+document.getElementById('lang-btn').addEventListener('click',()=>{
+  lang=lang==='en'?'gr':'en'; applyLang();
+});
+
+// ── INFO PANEL CONTENT ────────────────────────────────────────
+function buildInfoContent(){
+  const en=lang==='en';
+  return (en?`
+<h2>Greek Toponymic Atlas</h2>
+<div class="info-version">Version 1.0 &middot; 2026</div>
+<div class="info-author">Aris Vartholomaios &middot; University of Thessaly</div>
+<div class="info-license">MIT License &middot; <a href="https://github.com/avarth/toponymic_atlas_of_Greece" target="_blank" rel="noopener">Source code</a></div>
+
+<h3>Abstract</h3>
+<p>Interactive spatial analysis of 41,932 unique place names (90,592 geocoded features) from the National Gazetteer of Geographical Names of Greece. Each toponym is classified by etymological origin (Greek, Turkish/Ottoman, Slavic, Albanian, Venetian/Italian, Mixed, Unknown) and semantic category (religious, geomorphic, flora, fauna, anthroponym, etc.). Results are visualised on an H3 hexagonal grid across six thematic layers.</p>
+
+<h3>Methodology</h3>
+<p>Etymological origin is assigned through a three-stage hybrid pipeline:</p>
+<ul>
+<li><b>Stage 1 — Morphological rules:</b> Each name is matched against a combined Greek lexicon (84,619 lemmas from Wiktionary via Kaikki.org + 1,047,153 word forms from the EELLAK spell dictionary) and curated pattern inventories for non-Greek morphemes (Slavic, Turkish/Ottoman, Venetian, Albanian). The core rule is: etymology follows the root's living language. This stage resolves approximately 78% of names.</li>
+<li><b>Stage 2 — LLM disambiguation:</b> Unresolved names are processed through a large language model (Claude Sonnet) with the full classification ruleset embedded. The model returns an etymology, semantic category, and reasoning chain, adjudicated against Stage 1 via confidence-weighted merge.</li>
+<li><b>Stage 3 — Expert validation:</b> A stratified sample of 200 names is manually reviewed; all 2,468 non-Greek classifications are individually verified through LLM-drafted corrections reviewed by a domain expert.</li>
+</ul>
+<p>Semantic categories are assigned primarily by the LLM, which analyses name morphology, root meaning, and feature-type context. The gazetteer's 104 feature types provide a coarse signal (e.g., Chapel &rarr; religious), but most names require deeper analysis. Approximately 65% of names are classified as semantically opaque — an accurate reflection of lexical erosion in Greek toponymy.</p>
+
+<h3>Data Sources</h3>
+<ul>
+<li><b>National Gazetteer of Geographical Names of Greece</b> — 90,592 named, typed, geocoded features. Hellenic Military Geographical Service (HMGS) &amp; Hellenic Navy Hydrographic Service (HNHS). <a href="https://www.gys.gr/index.html" target="_blank" rel="noopener">gys.gr</a></li>
+<li><b>GHSL Built-Up Surface</b> (GHS-BUILT-S R2023A) — urban/rural classification. European Commission JRC. CC BY 4.0.</li>
+<li><b>Greek Census Settlements</b> (2011) — secondary urban classification. ELSTAT.</li>
+<li><b>Kaikki.org Greek Dictionary</b> — 84,619 lemmas from Wiktionary. <a href="https://kaikki.org/dictionary/Greek/" target="_blank" rel="noopener">kaikki.org</a></li>
+<li><b>EELLAK Spell Dictionary</b> — 1,047,153 Greek word forms. <a href="https://ellak.gr/" target="_blank" rel="noopener">ellak.gr</a></li>
+</ul>
+<p>Basemap tiles by <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>. Map data &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors. Built with <a href="https://leafletjs.com" target="_blank" rel="noopener">Leaflet</a>.</p>
+
+<h3>Oversights &amp; Errata</h3>
+<p>Every care has been taken to ensure accuracy. Etymological origin and semantic classification were produced through a combination of automated methods and expert review; however, the process was validated on a stratified sample rather than exhaustively for all 41,932 names. Errors in individual classifications are possible, particularly for rare or locally specific toponyms.</p>
+<p>If you notice an error or have a correction to suggest, please <a href="https://github.com/avarth/toponymic_atlas_of_Greece/issues" target="_blank" rel="noopener">open an issue</a> on the project repository.</p>
+
+<h3>AI Disclosure</h3>
+<p>This tool was developed with AI assistance (Anthropic Claude Opus 4.6 / Sonnet 4.6). The author designed the architecture and planned all features; AI tools were used to draft code diffs, code cleanup and implementation. All AI-generated code was reviewed by the author before inclusion. The author takes full responsibility for the correctness, design, and scientific validity of the code.</p>
+
+<div class="info-warn"><b>Note:</b> This atlas maps the diversity of place names by most probable linguistic origin. It is not an indication of the ethnic, linguistic, or religious composition of present-day populations. Hexagons are a spatial analysis unit and do not indicate or imply territorial claims.</div>
+`:`
+<h2>Ελληνικός Τοπωνυμικός Άτλας</h2>
+<div class="info-version">Έκδοση 1.0 &middot; 2026</div>
+<div class="info-author">Άρης Βαρθολομαίος &middot; Πανεπιστήμιο Θεσσαλίας</div>
+<div class="info-license">Άδεια MIT &middot; <a href="https://github.com/avarth/toponymic_atlas_of_Greece" target="_blank" rel="noopener">Πηγαίος κώδικας</a></div>
+
+<h3>Περίληψη</h3>
+<p>Διαδραστική χωρική ανάλυση 41.932 μοναδικών τοπωνυμίων (90.592 γεωκωδικοποιημένα χαρακτηριστικά) από το Εθνικό Μητρώο Γεωγραφικών Ονομάτων της Ελλάδας. Κάθε τοπωνύμιο ταξινομείται κατά ετυμολογική προέλευση (ελληνική, τουρκο-οθωμανική, σλαβική, αλβανική, βενετσιάνικη, μικτή, άγνωστη) και σημασιολογική κατηγορία (θρησκευτικό, γεωμορφολογικό, χλωρίδα, πανίδα, ανθρωπωνύμιο κ.ά.). Τα αποτελέσματα απεικονίζονται σε εξαγωνικό πλέγμα H3 μέσω έξι θεματικών επιπέδων.</p>
+
+<h3>Μεθοδολογία</h3>
+<p>Η ετυμολογική προέλευση αποδίδεται μέσω υβριδικής μεθοδολογίας τριών σταδίων:</p>
+<ul>
+<li><b>Στάδιο 1 — Μορφολογικοί κανόνες:</b> Κάθε όνομα αντιπαραβάλλεται με συνδυασμένο ελληνικό λεξικό (84.619 λήμματα από Wiktionary μέσω Kaikki.org + 1.047.153 τύποι λέξεων από το ορθογραφικό λεξικό ΕΕΛΛΑΚ) και επιμελημένα ευρετήρια μη ελληνικών μορφημάτων. Βασικός κανόνας: η ετυμολογία ακολουθεί τη ζωντανή γλώσσα της ρίζας. Το στάδιο αυτό επιλύει περίπου το 78% των ονομάτων.</li>
+<li><b>Στάδιο 2 — Αποσαφήνιση μέσω LLM:</b> Τα ανεπίλυτα ονόματα επεξεργάζονται από γλωσσικό μοντέλο (Claude Sonnet) με ενσωματωμένο το πλήρες σύνολο κανόνων. Το μοντέλο επιστρέφει ετυμολογία, σημασιολογική κατηγορία και αλυσίδα αιτιολόγησης.</li>
+<li><b>Στάδιο 3 — Επικύρωση από ειδικό:</b> Στρωματοποιημένο δείγμα 200 ονομάτων ελέγχεται χειροκίνητα· όλες οι 2.468 μη ελληνικές ταξινομήσεις επαληθεύονται μεμονωμένα μέσω προτάσεων LLM που εξετάζονται από ειδικό.</li>
+</ul>
+<p>Οι σημασιολογικές κατηγορίες αποδίδονται κυρίως από το γλωσσικό μοντέλο, που αναλύει τη μορφολογία, τη σημασία της ρίζας και τον τύπο χαρακτηριστικού. Οι 104 τύποι του μητρώου παρέχουν ένα αδρό σήμα (π.χ. Εκκλησάκι &rarr; θρησκευτικό), αλλά τα περισσότερα ονόματα απαιτούν βαθύτερη ανάλυση. Περίπου 65% ταξινομούνται ως σημασιολογικά αδιαφανή — αντικατοπτρίζοντας τη λεξιλογική φθορά στην ελληνική τοπωνυμία.</p>
+
+<h3>Πηγές δεδομένων</h3>
+<ul>
+<li><b>Εθνικό Μητρώο Γεωγραφικών Ονομάτων Ελλάδας</b> — 90.592 χαρακτηριστικά. Γεωγραφική Υπηρεσία Στρατού (ΓΥΣ) &amp; Υδρογραφική Υπηρεσία Πολεμικού Ναυτικού (ΥΠΠΝ). <a href="https://www.gys.gr/index.html" target="_blank" rel="noopener">gys.gr</a></li>
+<li><b>GHSL Built-Up Surface</b> (GHS-BUILT-S R2023A) — αστική/αγροτική ταξινόμηση. Ευρωπαϊκή Επιτροπή JRC. CC BY 4.0.</li>
+<li><b>Απογραφή οικισμών</b> (2011) — δευτερεύουσα αστική ταξινόμηση. ΕΛΣΤΑΤ.</li>
+<li><b>Kaikki.org Ελληνικό Λεξικό</b> — 84.619 λήμματα από Wiktionary. <a href="https://kaikki.org/dictionary/Greek/" target="_blank" rel="noopener">kaikki.org</a></li>
+<li><b>Ορθογραφικό Λεξικό ΕΕΛΛΑΚ</b> — 1.047.153 τύποι ελληνικών λέξεων. <a href="https://ellak.gr/" target="_blank" rel="noopener">ellak.gr</a></li>
+</ul>
+<p>Υπόβαθρο χάρτη: <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>. Δεδομένα χάρτη &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>. Κατασκευή με <a href="https://leafletjs.com" target="_blank" rel="noopener">Leaflet</a>.</p>
+
+<h3>Παραλείψεις &amp; Διορθώσεις</h3>
+<p>Καταβλήθηκε κάθε δυνατή προσπάθεια για την ακρίβεια των δεδομένων. Η ετυμολογική και σημασιολογική ταξινόμηση πραγματοποιήθηκε μέσω συνδυασμού αυτοματοποιημένων μεθόδων και ανθρώπινου ελέγχου· ωστόσο, η επικύρωση βασίστηκε σε στρωματοποιημένο δείγμα και όχι εξαντλητικά για το σύνολο των 41.932 ονομάτων. Σφάλματα σε μεμονωμένες ταξινομήσεις είναι πιθανά, ιδίως σε σπάνια ή τοπικά τοπωνύμια.</p>
+<p>Αν εντοπίσετε κάποιο σφάλμα ή επιθυμείτε να προτείνετε διόρθωση, <a href="https://github.com/avarth/toponymic_atlas_of_Greece/issues" target="_blank" rel="noopener">ανοίξτε ένα issue</a> στο αποθετήριο του έργου.</p>
+
+<h3>Δήλωση χρήσης AI</h3>
+<p>Το εργαλείο αναπτύχθηκε με τη βοήθεια τεχνητής νοημοσύνης (Anthropic Claude Opus 4.6 / Sonnet 4.6). Ο δημιουργός σχεδίασε την αρχιτεκτονική και προγραμμάτισε όλα τα χαρακτηριστικά· τα εργαλεία AI χρησιμοποιήθηκαν για σύνταξη κώδικα, καθαρισμό και υλοποίηση. Όλος ο κώδικας που παρήχθη από AI ελέγχθηκε από τον δημιουργό πριν τη συμπερίληψή του. Ο δημιουργός φέρει πλήρη ευθύνη για την ορθότητα, τον σχεδιασμό και την επιστημονική εγκυρότητα του κώδικα.</p>
+
+<div class="info-warn"><b>Σημείωση:</b> Ο άτλας καταγράφει την ποικιλία των τοπωνυμίων με βάση την πιθανότερη γλωσσική προέλευση. Δεν αποτελεί ένδειξη εθνοτικής, γλωσσικής ή θρησκευτικής σύνθεσης σημερινών πληθυσμών. Τα εξάγωνα αποτελούν μονάδα χωρικής ανάλυσης και δεν υποδηλώνουν εδαφικές διεκδικήσεις.</div>
+`);
+}
+
+// ── colors.js ──
+// ── colors.js ─────────────────────────────────────────────────
+// Pure colour functions: linear interpolation, Viridis palette, sequential ramp.
+// Also: esc() HTML-escape helper for safe innerHTML interpolation.
+
+function esc(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function lerp(a,b,t){return a+(b-a)*t;}
+
+function viridis(v){
+  v=Math.max(0,Math.min(1,v));
+  const s=[[68,1,84],[72,40,120],[62,83,160],[49,122,183],[38,157,199],[53,183,171],[109,204,117],[180,221,66],[253,231,37]];
+  const i=(s.length-1)*v,lo=Math.floor(i),hi=Math.min(lo+1,s.length-1),f=i-lo;
+  return `rgb(${Math.round(s[lo][0]+(s[hi][0]-s[lo][0])*f)},${Math.round(s[lo][1]+(s[hi][1]-s[lo][1])*f)},${Math.round(s[lo][2]+(s[hi][2]-s[lo][2])*f)})`;
+}
+
+// Urban/rural filter guard — shared by sacred, poly, oddities modules
+function passesFilter(p){
+  if(FILTER==='urb'&&!p.s) return false;
+  if(FILTER==='rur'&&p.s) return false;
+  return true;
+}
+
+function seqColor(v,r1,g1,b1,r2,g2,b2){
+  v=Math.max(0,Math.min(1,v));
+  return `rgb(${Math.round(lerp(r1,r2,v))},${Math.round(lerp(g1,g2,v))},${Math.round(lerp(b1,b2,v))})`;
+}
+
+// ── layers.js ──
+// ── layers.js ─────────────────────────────────────────────────
+// Hex layer system: hexProfilePopup, makeHL, LAYER_DEFS registry,
+// lazy _layerCache, getLayer(), invalidateLayerCache().
+
+function hexProfilePopup(centerLat,centerLon,n){
+  const key=`${Math.round(centerLat*10000)/10000},${Math.round(centerLon*10000)/10000}`;
+  const profileEntry=PROFILES[key];
+  if(!profileEntry) return '';
+  const profile=profileEntry[FILTER];
+  if(!profile) return '';
+  const wc=profile.wc;
+  if(!wc||wc.length===0) return '';
+  const words=wc.map(([name])=>{
+    const cat=classifyName(name);
+    const col=cat?SEM_COLORS[cat]:null;
+    const dot=col?`<span class="wc-dot" style="background:${col}"></span>`
+                 :`<span class="wc-dot wc-dot-hollow"></span>`;
+    return `<span class="wc-word">${dot}${esc(name)}</span>`;
+  }).join('');
+  const sc=profile.sc;
+  const total=Object.values(sc).reduce((a,b)=>a+b,0);
+  const semBars=Object.entries(sc).filter(([k])=>k!=='opaque').sort((a,b)=>b[1]-a[1]).slice(0,6).map(([k,v])=>
+    `<div class="sem-bar"><span class="sem-bar-label">${esc(semLabel(k))}</span><div class="sem-bar-track"><div class="sem-bar-fill" style="width:${Math.round(100*v/total)}%;background:${SEM_COLORS[k]||'#ccc'}"></div></div></div>`
+  ).join('');
+  return `<div class="hex-profile"><div class="wc-wrap">${words}</div><h4 style="margin-top:8px">${t('hp_sem')}</h4><div class="sem-bars">${semBars}</div></div>`;
+}
+
+function makeHL(data,colorFn,tipFn){
+  const lg=L.layerGroup();
+  data.forEach(h=>{
+    const d=h[FILTER]; if(!d) return;
+    const col=colorFn(d,h); if(col===null) return;
+    const poly=L.polygon(h.b.map(p=>[p[0],p[1]]),{
+      fillColor:col,fillOpacity:0.72,weight:0.3,color:'#fff',opacity:0.5});
+    poly._hd=d; poly._origColor=col;
+    poly.bindPopup(()=>tipFn(d,h),{maxWidth:340});
+    lg.addLayer(poly);
+  });
+  return lg;
+}
+
+// ── LAYER DEFINITIONS ─────────────────────────────────────────
+// Single authoritative registry — color and tooltip defined once per layer.
+const LAYER_DEFS={
+  ent:{
+    data:()=>ENT,
+    // d.hr = normalised entropy ratio [0,1]; stretch [0.92,1.0] to full viridis scale
+    color:d=>viridis(Math.max(0,(d.hr-0.92)/0.08)),
+    tip:(d,h)=>{const c=h.c||[0,0]; let s=`<span class="pb">${esc(t('p_div_h'))}: ${esc(translateLabel(d.lbl))}</span><br>`;
+      if(d.u!==d.n) s+=`<span class="pt">${d.u} ${esc(t('p_unique'))} ${d.n} ${esc(t('p_features'))}<br>`;
+      else s+=`<span class="pt">${d.n} ${esc(t('p_features'))}<br>`;
+      s+=`${Math.round(d.hr*100)}% ${esc(t('p_unique_pct'))}</span>`;
+      return s+hexProfilePopup(c[0],c[1],d.n);}
+  },
+  sem:{
+    data:()=>SEM,
+    color:d=>SEM_COLORS[d.d]||'#ccc',
+    tip:(d,h)=>{const c=h.c||[0,0];const nUncl=Math.round(d.op*d.n/100);
+      const pn=t('p_names');
+      return `<span class="pb">${esc(t('p_mainly'))} ${esc(semLabel(d.d))}${pn?' '+esc(pn):''}</span><br>`+
+      `<span class="pt">${d.n} ${esc(t('p_ftotal'))}${nUncl>0?' · '+nUncl+' '+esc(t('p_unclear')):''}</span>`+
+      hexProfilePopup(c[0],c[1],d.n);}
+  },
+  sem_ent:{
+    data:()=>SEM,
+    // skip opaque-dominant hexes (d=opaque, or >80% of names are opaque = too little signal)
+    // he normalised 0-1; p95=0.80 → stretch to full scale
+    // Aegean sequential: parchment → warm olive → deep teal (mono → multi-thematic)
+    // Distribution of he (after filter op≤80): p25=0.66, p50=0.73, p75=0.78, p90=0.82, p95=0.85
+    // Stretch [0.55,0.85] → [0,1] to expose the meaningful variation
+    color:d=>{
+      if(d.d==='opaque'||d.op>80) return null;
+      const ratio=Math.max(0,Math.min((d.he-0.55)/0.30,1));
+      if(ratio<0.5){const u=ratio/0.5;return seqColor(u,244,241,234,176,154,88);}
+      const u=(ratio-0.5)/0.5;return seqColor(u,176,154,88,38,72,86);
+    },
+    tip:(d,h)=>{const c=h.c||[0,0];const pn=t('p_names');
+      return `<span class="pb">${esc(t('l_sem_ent'))}: ${Math.round(d.he*100)}%</span><br>`+
+      `<span class="pt">${esc(t('p_mainly'))} ${esc(semLabel(d.d))}${pn?' '+esc(pn):''} (${d.dp}%)<br>${d.n} ${esc(t('p_ftotal'))}</span>`+
+      hexProfilePopup(c[0],c[1],d.n);}
+  },
+  pfx_all:{
+    data:()=>PREFIX,
+    color:d=>seqColor(Math.sqrt(Math.min(d.all/d.nu*100/60,1)),228,218,200,30,58,95),
+    tip:(d)=>{const names=[];
+      const M=[['Νέο',d.tn],['Παλαιό',d.tp],['Άνω',d.ta],['Κάτω',d.tk],['Μεγάλο',d.tm],['Μικρό',d.tmi]];
+      M.forEach(([lbl,arr])=>{if(arr&&arr.length) arr.forEach(n=>names.push(`<b>${esc(lbl)}</b> → ${esc(n)}`));});
+      return `<span class="pb">${d.all} ${esc(t('p_mod_names'))}</span><br><span class="pt">${names.join('<br>')||'—'}</span>`;}
+  },
+  pfx_neo:{data:()=>PREFIX,color:d=>seqColor(Math.sqrt(Math.min(d.neo/d.nu*100/20,1)),228,218,200,179,74,44),tip:(d)=>`<span class="pb">Νέο · ${d.neo}</span><br><span class="pt">${d.tn.map(esc).join('<br>')||'—'}</span>`},
+  pfx_pal:{data:()=>PREFIX,color:d=>seqColor(Math.sqrt(Math.min(d.pal/d.nu*100/20,1)),228,218,200,142,90,68),tip:(d)=>`<span class="pb">Παλαιό · ${d.pal}</span><br><span class="pt">${d.tp.map(esc).join('<br>')||'—'}</span>`},
+  pfx_ano:{data:()=>PREFIX,color:d=>seqColor(Math.sqrt(Math.min(d.ano/d.nu*100/20,1)),228,218,200,107,142,78),tip:(d)=>`<span class="pb">Άνω · ${d.ano}</span><br><span class="pt">${d.ta.map(esc).join('<br>')||'—'}</span>`},
+  pfx_kat:{data:()=>PREFIX,color:d=>seqColor(Math.sqrt(Math.min(d.kat/d.nu*100/20,1)),228,218,200,74,124,138),tip:(d)=>`<span class="pb">Κάτω · ${d.kat}</span><br><span class="pt">${d.tk.map(esc).join('<br>')||'—'}</span>`},
+  pfx_meg:{data:()=>PREFIX,color:d=>seqColor(Math.sqrt(Math.min(d.meg/d.nu*100/20,1)),228,218,200,122,101,72),tip:(d)=>`<span class="pb">Μεγάλο · ${d.meg}</span><br><span class="pt">${d.tm.map(esc).join('<br>')||'—'}</span>`},
+  pfx_mik:{data:()=>PREFIX,color:d=>seqColor(Math.sqrt(Math.min(d.mik/d.nu*100/20,1)),228,218,200,107,91,115),tip:(d)=>`<span class="pb">Μικρό · ${d.mik}</span><br><span class="pt">${d.tmi.map(esc).join('<br>')||'—'}</span>`},
+  etym_div:{
+    data:()=>ETYM,
+    // parchment → warm taupe (non-categorical, gentle — max non-Greek ~30%)
+    color:d=>seqColor(Math.min((100-d.gk)/30,1),244,241,234,138,118,90),
+    tip:(d)=>{const segs=[{l:'Greek',v:d.gk},{l:'Turkish/Ottoman',v:d.tk},
+      {l:'Slavic',v:d.sl},{l:'Mixed/Compound',v:d.mx},{l:'Venetian/Italian',v:d.vn},
+      {l:'Albanian',v:d.al},{l:'Unknown',v:d.un}].filter(s=>s.v>0).map(s=>({...s,c:ETYM_COLORS[s.l]}));
+      const bars=segs.map(s=>`<div class="bar-seg" style="width:${s.v}%;background:${s.c};"></div>`).join('');
+      const bd=segs.map(s=>`<span style="color:${s.c}">■</span> ${esc(tEtym(s.l))}: ${s.v}%`).join(' ');
+      const nOrig=segs.length;
+      return `<span class="pb">${nOrig} ${t('p_norigins')}</span><br>`+
+        `<div class="bar-wrap">${bars}</div><span class="pt">${bd}<br>${d.n} ${t('p_ftotal')}${formatNonGreek(d.ngl)}</span>`;}
+  }
+};
+
+// ── LAZY LAYER CACHE ──────────────────────────────────────────
+// Layers are built on first access; invalidated when FILTER changes.
+const _layerCache={};
+function getLayer(id){
+  if(!_layerCache[id]){
+    const def=LAYER_DEFS[id];
+    _layerCache[id]=makeHL(def.data(),def.color,def.tip);
+  }
+  return _layerCache[id];
+}
+function getLayerIfBuilt(id){ return _layerCache[id]||null; }
+function invalidateLayerCache(){
+  Object.keys(_layerCache).forEach(k=>{
+    if(map.hasLayer(_layerCache[k])) map.removeLayer(_layerCache[k]);
+    delete _layerCache[k];
+  });
+}
+
+// ── charts.js ──
+// ── charts.js ─────────────────────────────────────────────────
+// Semantic legend DOM setup, sidebar bar charts, updateSemLeg.
+
+// Build the semantic category legend (uses SEM_COLORS, SEM_LABELS from constants.js)
+const semLeg=document.getElementById('sem-leg');
+['religious','anthroponym','geomorphic','flora','fauna','hydro','built','transport','colour','ethnic'].forEach(c=>{
+  const sp=document.createElement('span');sp.className='li';
+  sp.innerHTML=`<span class="ldot" style="background:${SEM_COLORS[c]}"></span><span data-sem-leg="${c}">${SEM_LABELS[c]}</span>`;
+  semLeg.appendChild(sp);
+});
+function updateSemLeg(){
+  document.querySelectorAll('[data-sem-leg]').forEach(el=>{el.textContent=semLabel(el.dataset.semLeg);});
+}
+
+function makeBarChart(container, title, items, maxVal, colorFn){
+  let html=`<div class="chart-title">${esc(title)}</div>`;
+  items.forEach(([label,val,key])=>{
+    const pct=Math.round(100*val/maxVal);
+    const col=typeof colorFn==='function'?colorFn(label):'var(--blue)';
+    html+=`<div class="hbar"${key?' data-hkey="'+esc(key)+'"':''}><span class="hbar-label">${esc(label)}</span>`+
+      `<div class="hbar-track"><div class="hbar-fill" style="width:${pct}%;background:${col}"></div></div>`+
+      `<span class="hbar-val">${val>999?(val/1000).toFixed(1)+'k':val}</span></div>`;
+  });
+  container.innerHTML=html;
+}
+
+function buildCharts(){
+  const C=CHARTS[FILTER];
+  const semItems=Object.entries(C.sem).filter(([k])=>k!=='opaque').map(([k,v])=>[semLabel(k),v,k]);
+  const semMax=Math.max(...semItems.map(x=>x[1]));
+  makeBarChart(document.getElementById('chart-sem'),t('ct_sem'),semItems,semMax,l=>{
+    const key=Object.keys(SEM_LABELS).find(k=>SEM_LABELS[k]===l||SEM_LABELS_GR[k]===l); return SEM_COLORS[key]||'#999';});
+  const opaqueN=C.sem.opaque||0;
+  const totalN=Object.values(C.sem).reduce((a,b)=>a+b,0);
+  const opaqueP=totalN?Math.round(100*opaqueN/totalN):0;
+  const semEl=document.getElementById('chart-sem');
+  const note=document.createElement('div');note.className='chart-note';
+  note.textContent=lang==='gr'?`${opaqueN.toLocaleString()} ονόματα με ασαφή σημασία (${opaqueP}%)`
+    :`${opaqueN.toLocaleString()} names with unclear meaning (${opaqueP}%)`;
+  semEl.appendChild(note);
+  const hint=document.createElement('div');hint.className='chart-hint';
+  hint.textContent=lang==='gr'?'πέρνα πάνω από κατηγορία για απομόνωση':'hover over category to isolate';
+  semEl.appendChild(hint);
+  const nameItems=C.top_names.map(([n,c])=>[n,c]);
+  makeBarChart(document.getElementById('chart-topnames'),t('ct_top'),nameItems,nameItems[0][1],l=>SEM_COLORS[classifyName(l)||'anthroponym']);
+  const modItems=Object.entries(C.mod_counts);
+  const modMax=Math.max(...modItems.map(x=>x[1]));
+  makeBarChart(document.getElementById('chart-mods'),t('ct_mods'),modItems,modMax,()=>'var(--blue)');
+  const etymItems=Object.entries(C.etym).map(([k,v])=>[tEtym(k),v,k]);
+  const etymMax=etymItems[0][1];
+  makeBarChart(document.getElementById('chart-etym'),t('ct_etym'),etymItems,etymMax,l=>ETYM_COLORS[l]||'#999');
+  const etymHint=document.createElement('div');etymHint.className='chart-hint';
+  etymHint.textContent=lang==='gr'?'πέρνα πάνω από κατηγορία για απομόνωση':'hover over category to isolate';
+  document.getElementById('chart-etym').appendChild(etymHint);
+  updateSemLeg();
+  wireChartHover();
+}
+
+// ── HOVER HIGHLIGHT ───────────────────────────────────────────
+// Sem bars → isolate hexes of that dominant category on sem layer
+// Etym bars → highlight hexes containing that linguistic origin
+
+function hexHighlightSem(catKey){
+  const layer=getLayerIfBuilt('sem'); if(!layer) return;
+  layer.eachLayer(p=>{
+    if(!p._hd) return;
+    if(catKey){
+      if(p._hd.d===catKey) p.setStyle({fillColor:p._origColor,fillOpacity:0.82});
+      else p.setStyle({fillColor:'#d4d0c6',fillOpacity:0.25});
+    } else {
+      p.setStyle({fillColor:p._origColor,fillOpacity:0.72});
+    }
+  });
+}
+function hexHighlightEtym(etymKey){
+  const layer=getLayerIfBuilt('etym_div'); if(!layer) return;
+  const dk=ETYM_KEY_MAP[etymKey];
+  const col=ETYM_COLORS[etymKey];
+  layer.eachLayer(p=>{
+    if(!p._hd) return;
+    if(etymKey){
+      const val=p._hd[dk]||0;
+      if(val>0) p.setStyle({fillColor:col,fillOpacity:Math.max(0.3,val/100)});
+      else p.setStyle({fillColor:'#d4d0c6',fillOpacity:0.18});
+    } else {
+      p.setStyle({fillColor:p._origColor,fillOpacity:0.72});
+    }
+  });
+}
+function wireChartHover(){
+  document.querySelectorAll('#chart-sem .hbar[data-hkey]').forEach(bar=>{
+    bar.style.cursor='default';
+    bar.addEventListener('mouseenter',()=>{if(activeLayer==='sem') hexHighlightSem(bar.dataset.hkey);});
+    bar.addEventListener('mouseleave',()=>{if(activeLayer==='sem') hexHighlightSem(null);});
+  });
+  document.querySelectorAll('#chart-etym .hbar[data-hkey]').forEach(bar=>{
+    bar.style.cursor='default';
+    bar.addEventListener('mouseenter',()=>{if(activeLayer==='etym_div') hexHighlightEtym(bar.dataset.hkey);});
+    bar.addEventListener('mouseleave',()=>{if(activeLayer==='etym_div') hexHighlightEtym(null);});
+  });
+}
+
+// ── sacred.js ──
+// ── sacred.js ─────────────────────────────────────────────────
+// Sacred Names tab: chip/DOM build from HAGIO data, rebuildSacredLayers.
+
+// Aegean earth tones — desaturated, harmonised with SEM_COLORS palette
+const SCOLS=['#1e3a5f','#b34a2c','#6b8e4e','#7a6548','#4a7c8a','#8e5a44','#6b5b73','#c17a3c','#5f6b3a','#9c8856',
+  '#4a3a5a','#2f5d6b','#8a4a38','#5a7348','#a8754a','#3a4d6b','#7a4a5c','#556b3c','#9a6b48','#3c5260',
+  '#6b4a38','#4a6548','#8a6a3c','#5a4858','#3c6878','#7a5a2c','#4a5548','#6a3838','#5a7a5a','#8a5c4c',
+  '#3a4a3c','#5a4048','#6e5838','#2c4858','#7c5848','#485a6b','#5f4a4a','#8a7a5a','#4a6a5c','#6c4a6a'];
+const sacredState={};let colorIndex=0;
+const CAT_ORDER=['saints','theotokos','prophets','archangels','feasts','structures','other_religious'];
+const sacredWrap=document.getElementById('sacred-groups');
+CAT_ORDER.forEach(cat=>{
+  if(!HAGIO[cat]) return;
+  const names=HAGIO[cat];
+  const total=Object.values(names).reduce((s,v)=>s+v.count,0);
+  const hdr=document.createElement('div');hdr.className='cat-hdr';
+  hdr.innerHTML=`<span class="cat-arrow">▼</span> <span data-i="cat_${cat}">${t('cat_'+cat)}</span><span class="cat-count">${total}</span>`;
+  const wrap=document.createElement('div');wrap.className='chip-wrap';wrap.style.display='none';
+  hdr.classList.add('collapsed');
+  hdr.addEventListener('click',()=>{
+    hdr.classList.toggle('collapsed');wrap.style.display=hdr.classList.contains('collapsed')?'none':'flex';});
+  sacredWrap.appendChild(hdr);sacredWrap.appendChild(wrap);
+  Object.entries(names).sort((a,b)=>b[1].count-a[1].count).forEach(([name,info])=>{
+    const col=SCOLS[colorIndex%SCOLS.length];colorIndex++;
+    const lg=L.layerGroup();
+    info.points.forEach(p=>{
+      const m=L.circleMarker([p.lat,p.lon],{radius:4,fillColor:col,color:'#fff',weight:1,fillOpacity:0.85});
+      m.on('click',()=>m.setPopupContent(`<span class="pb">${esc(name)}</span><br><span class="pt">${esc(tType(p.type))}</span>`));
+      m.bindPopup('');lg.addLayer(m);});
+    sacredState[name]={layer:lg,color:col,on:false};
+    const chip=document.createElement('button');chip.className='chip';chip.dataset.name=name;
+    const short=name.replace('Άγιος ','Αγ. ').replace('Αγία ','Αγ. ').replace('Προφήτης ','Πρ. ').replace('Άγιοι ','Αγ. ');
+    chip.innerHTML=`${esc(short)}<span class="cn">${info.count}</span>`;
+    chip.addEventListener('click',()=>{
+      const st=sacredState[name];
+      if(st.on){map.removeLayer(st.layer);st.on=false;chip.classList.remove('on');chip.style.cssText='';}
+      else{st.layer.addTo(map);st.on=true;chip.classList.add('on');chip.style.background=st.color;chip.style.color='#fff';}
+    });
+    wrap.appendChild(chip);
+  });
+});
+
+function rebuildSacredLayers(){
+  Object.entries(sacredState).forEach(([name,st])=>{
+    if(st.on) map.removeLayer(st.layer);
+    const lg=L.layerGroup();
+    const cat=Object.keys(HAGIO).find(c=>HAGIO[c][name]);
+    if(!cat) return;
+    const info=HAGIO[cat][name];
+    const col=st.color;
+    info.points.forEach(p=>{
+      if(!passesFilter(p)) return;
+      const m=L.circleMarker([p.lat,p.lon],{radius:4,fillColor:col,color:'#fff',weight:1,fillOpacity:0.85});
+      m.on('click',()=>m.setPopupContent(`<span class="pb">${esc(name)}</span><br><span class="pt">${esc(tType(p.type))}</span>`));
+      m.bindPopup('');lg.addLayer(m);
+    });
+    st.layer=lg;
+    const onSaints=(document.querySelector('.tab.on')?.dataset.tab)==='saints';
+    if(st.on&&onSaints) lg.addTo(map);
+  });
+}
+
+// ── poly.js ──
+// ── poly.js ───────────────────────────────────────────────────
+// Polymorphism tab: dropdown build, change handler, polyLayerOnMap.
+
+function typeColor(typeKey){return TYPE_COLORS[typeKey]||'#6b5b73';}
+
+let polyLayerOnMap=null;
+let polyMarkersByType={}; // {typeKey: [marker,...]} for hover-highlight
+const polySelect=document.getElementById('poly-sel'),polyDetail=document.getElementById('poly-detail');
+Object.entries(POLY).sort((a,b)=>b[1].score-a[1].score).forEach(([name,info])=>{
+  const opt=document.createElement('option');opt.value=name;
+  opt.textContent=`${name} (${info.n_types} ${lang==='gr'?'τύποι':'types'} · ${Math.round(info.norm_entropy*100)}%)`;
+  polySelect.appendChild(opt);});
+
+function polyHighlight(t){
+  Object.entries(polyMarkersByType).forEach(([k,arr])=>{
+    const dim=t&&k!==t;
+    arr.forEach(m=>{
+      if(dim){m.setStyle({fillColor:'#bdb6a8',fillOpacity:.35,color:'#fff',weight:1});
+        if(m._path) m._path.style.zIndex='0';}
+      else{m.setStyle({fillColor:typeColor(k),fillOpacity:.88,color:'#fff',weight:1.5});
+        if(t===k&&m.bringToFront) m.bringToFront();}
+    });
+  });
+}
+polySelect.addEventListener('change',()=>{
+  if(polyLayerOnMap){map.removeLayer(polyLayerOnMap);polyLayerOnMap=null;}polyDetail.innerHTML='';
+  polyMarkersByType={};
+  const name=polySelect.value;if(!name) return;const info=POLY[name];const lg=L.layerGroup();
+  info.points.forEach(p=>{
+    if(!passesFilter(p)) return;
+    const m=L.circleMarker([p.lat,p.lon],{radius:6,fillColor:typeColor(p.type),color:'#fff',weight:1.5,fillOpacity:0.88});
+    m.bindTooltip(tType(p.type),{permanent:false,direction:'top',className:'type-tip'});
+    m.bindPopup(`<span class="pb">${esc(name)}</span> → <b>${esc(tType(p.type))}</b>`);lg.addLayer(m);
+    (polyMarkersByType[p.type]=polyMarkersByType[p.type]||[]).push(m);});
+  polyLayerOnMap=lg;
+  if(document.querySelector('.tab.on').dataset.tab==='poly') lg.addTo(map);
+  // Build type list from actual markers (not info.types) so only types with visible points appear
+  const visibleTypes=Object.keys(polyMarkersByType).length;
+  const visibleCount=Object.values(polyMarkersByType).reduce((s,a)=>s+a.length,0);
+  const tl=Object.entries(polyMarkersByType).sort((a,b)=>b[1].length-a[1].length)
+    .map(([tp,arr])=>`<span class="trow" data-ptype="${esc(tp)}"><span class="tdot" style="background:${typeColor(tp)}"></span>${esc(tType(tp))}: ${arr.length}×</span>`).join('<br>');
+  polyDetail.innerHTML=`<b>${visibleTypes} ${lang==='gr'?'τύποι':'types'} · ${visibleCount} ${lang==='gr'?'εμφανίσεις':'occurrences'} · ${lang==='gr'?'διασπορά':'spread'} ${Math.round(info.norm_entropy*100)}%</b><br><br>`+tl;
+  polyDetail.querySelectorAll('.trow').forEach(row=>{
+    row.addEventListener('mouseenter',()=>polyHighlight(row.dataset.ptype));
+    row.addEventListener('mouseleave',()=>polyHighlight(null));
+  });
+  if(info.points.length>0) map.fitBounds(L.latLngBounds(info.points.map(p=>[p.lat,p.lon])).pad(0.15));
+});
+
+// ── oddities.js ──
+// ── oddities.js ───────────────────────────────────────────────
+// Oddities tab: category chips, renderOddMap, renderOddList.
+
+const ODD_CATS={vulgar:'#b34a2c',dark:'#4a3a5a',rogue:'#8a7224',animal:'#6b8e4e',household:'#4a7c8a',stinky:'#7a6548'};
+const oddState={};
+let oddLayerOnMap=null;
+let oddMarkersByName={}; // {name: [{marker, color},...]} for hover-highlight
+
+// Build category chips
+const oddChipWrap=document.getElementById('odd-chips');
+Object.entries(ODD_CATS).forEach(([cat,col])=>{
+  const chip=document.createElement('button');chip.className='chip';chip.dataset.cat=cat;
+  chip.dataset.i='odd_'+cat;chip.textContent=t('odd_'+cat);
+  oddState[cat]={on:false,color:col};
+  chip.addEventListener('click',()=>{
+    const st=oddState[cat];
+    if(st.on){st.on=false;chip.classList.remove('on');chip.style.cssText='';}
+    else{st.on=true;chip.classList.add('on');chip.style.background=st.color;chip.style.color='#fff';}
+    renderOddMap();
+    renderOddList();
+  });
+  oddChipWrap.appendChild(chip);
+});
+
+function oddHighlight(name){
+  Object.entries(oddMarkersByName).forEach(([n,arr])=>{
+    const dim=name&&n!==name;
+    arr.forEach(({marker:m,color:col})=>{
+      if(dim) m.setStyle({fillColor:'#bdb6a8',fillOpacity:.25,color:'#fff',weight:1});
+      else{m.setStyle({fillColor:col,fillOpacity:.9,color:'#fff',weight:1.5});if(name===n&&m.bringToFront)m.bringToFront();}
+    });
+  });
+}
+function renderOddMap(){
+  if(oddLayerOnMap){map.removeLayer(oddLayerOnMap);oddLayerOnMap=null;}
+  oddMarkersByName={};
+  const activeCats=Object.entries(oddState).filter(([,s])=>s.on).map(([c])=>c);
+  if(!activeCats.length) return;
+  const lg=L.layerGroup();
+  ODD.filter(item=>activeCats.includes(item.cat)).forEach(item=>{
+    const col=ODD_CATS[item.cat];
+    item.points.forEach(p=>{
+      if(!passesFilter(p)) return;
+      const m=L.circleMarker([p.lat,p.lon],{radius:7,fillColor:col,color:'#fff',weight:1.5,fillOpacity:0.9});
+      m.on('click',()=>m.setPopupContent(
+        `<span class="pb">${esc(item.name)}</span><br>`+
+        `<span class="pt" style="font-style:italic">${esc(lang==='gr'?item.gloss_gr:item.gloss)}</span><br>`+
+        `<span class="pt">${esc(tType(p.type))}</span>`
+      ));
+      m.bindPopup('');lg.addLayer(m);
+      (oddMarkersByName[item.name]=oddMarkersByName[item.name]||[]).push({marker:m,color:col});
+    });
+  });
+  oddLayerOnMap=lg;
+  if(document.querySelector('.tab.on').dataset.tab==='odd') lg.addTo(map);
+}
+
+function renderOddList(){
+  const list=document.getElementById('odd-list');
+  const activeCats=Object.entries(oddState).filter(([,s])=>s.on).map(([c])=>c);
+  if(!activeCats.length){list.innerHTML='';return;}
+  const items=ODD.filter(i=>activeCats.includes(i.cat));
+  list.innerHTML='';
+  items.forEach(i=>{
+    const col=ODD_CATS[i.cat];
+    const gloss=lang==='gr'?i.gloss_gr:i.gloss;
+    const row=document.createElement('div');
+    row.className='odd-row';
+    row.innerHTML=`<span class="odd-dot" style="background:${col}"></span>
+      <span class="odd-name">${esc(i.name)}</span>
+      ${lang!=='gr'?`<span class="odd-gloss">${esc(gloss)}</span>`:''}
+      <span class="odd-count">${i.count>1?i.count+'×':''}</span>`;
+    row.addEventListener('mouseenter',()=>{row.style.background='var(--rule)';oddHighlight(i.name);});
+    row.addEventListener('mouseleave',()=>{row.style.background='';oddHighlight(null);});
+    list.appendChild(row);
+  });
+}
+
+// ── main.js ──
+// ── main.js ───────────────────────────────────────────────────
+// Map initialisation, layer/filter/tab event wiring, startup sequence.
+
+// ── INFO MODAL ────────────────────────────────────────────────
+const infoOverlay=document.getElementById('info-overlay');
+const infoBody=document.getElementById('info-body');
+document.getElementById('info-btn').addEventListener('click',()=>{
+  infoBody.innerHTML=buildInfoContent();
+  infoOverlay.classList.add('open');
+});
+document.getElementById('info-close').addEventListener('click',()=>infoOverlay.classList.remove('open'));
+infoOverlay.addEventListener('click',e=>{if(e.target===infoOverlay) infoOverlay.classList.remove('open');});
+
+// ── MAP ───────────────────────────────────────────────────────
+const greeceBounds=L.latLngBounds([33.5,18.5],[43.5,30.5]);
+const map=L.map('map',{center:[38.5,24.0],zoom:7,zoomControl:true,
+  maxBounds:greeceBounds.pad(0.15),maxBoundsViscosity:0.8,minZoom:5,maxZoom:16});
+const tileVoyager=L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}{r}.png',
+  {attribution:'© OSM © CARTO',maxZoom:18});
+const tileLight=L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png',
+  {attribution:'© OSM © CARTO',maxZoom:18});
+const tileDark=L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+  {attribution:'© OSM © CARTO',maxZoom:18});
+const tileTopo=L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
+  {attribution:'© OSM © OpenTopoMap',maxZoom:17});
+const tileLabels=L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}{r}.png',
+  {attribution:'',maxZoom:18,pane:'shadowPane'});
+tileVoyager.addTo(map);
+tileLabels.addTo(map);
+L.control.layers({'Aegean':tileVoyager,'Light':tileLight,'Dark':tileDark,'Terrain':tileTopo},{},{position:'topright'}).addTo(map);
+L.control.scale({imperial:false,position:'bottomright'}).addTo(map);
+
+// ── INITIAL LAYER ─────────────────────────────────────────────
+let activeLayer='sem';
+getLayer('sem').addTo(map);
+buildCharts();
+
+// ── FILTER TOGGLE ─────────────────────────────────────────────
+const TAB_DEFAULT_LAYER={maps:'sem',modif:'pfx_all',etym:'etym_div',saints:null,poly:null,odd:null};
+
+function rebuildActiveLayer(){
+  invalidateLayerCache();
+  const curTab=document.querySelector('.tab.on')?.dataset.tab||'maps';
+  if(TAB_DEFAULT_LAYER[curTab]) getLayer(activeLayer).addTo(map);
+  buildCharts();
+  rebuildSacredLayers();
+  if(curTab==='odd'){renderOddMap();renderOddList();}
+}
+
+document.querySelectorAll('.fbtn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const f=btn.dataset.filter; if(f===FILTER) return;
+    FILTER=f;
+    document.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('on'));
+    btn.classList.add('on');
+    rebuildActiveLayer();
+    // Re-trigger poly dropdown to rebuild with new filter
+    if(document.getElementById('poly-sel').value) document.getElementById('poly-sel').dispatchEvent(new Event('change'));
+  });
+});
+
+document.querySelectorAll('.lcard').forEach(card=>{
+  card.addEventListener('click',()=>{
+    const which=card.dataset.layer; if(!which||which===activeLayer) return;
+    map.removeLayer(getLayer(activeLayer));
+    document.querySelector('.lcard.on')?.classList.remove('on');
+    card.classList.add('on');
+    getLayer(which).addTo(map); activeLayer=which;
+  });
+});
+
+// ── TABS ──────────────────────────────────────────────────────
+function syncTab(tab){
+  // Reset filter to "all" on every tab switch to avoid confusion
+  if(FILTER!=='all'){
+    FILTER='all';
+    document.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('on'));
+    document.querySelector('.fbtn[data-filter="all"]')?.classList.add('on');
+    invalidateLayerCache();
+  }
+  map.removeLayer(getLayer(activeLayer));
+  if(TAB_DEFAULT_LAYER[tab]){
+    const def=TAB_DEFAULT_LAYER[tab];
+    document.querySelectorAll('.lcard').forEach(c=>c.classList.remove('on'));
+    document.querySelector(`.lcard[data-layer="${def}"]`)?.classList.add('on');
+    getLayer(def).addTo(map); activeLayer=def;
+  }
+  if(tab==='poly'){if(polyLayerOnMap&&!map.hasLayer(polyLayerOnMap)) polyLayerOnMap.addTo(map);}
+  else{if(polyLayerOnMap&&map.hasLayer(polyLayerOnMap)) map.removeLayer(polyLayerOnMap);}
+  if(tab==='odd'){if(oddLayerOnMap&&!map.hasLayer(oddLayerOnMap)) oddLayerOnMap.addTo(map);}
+  else{if(oddLayerOnMap&&map.hasLayer(oddLayerOnMap)) map.removeLayer(oddLayerOnMap);}
+  if(tab==='saints'){Object.values(sacredState).forEach(st=>{if(st.on&&!map.hasLayer(st.layer)) st.layer.addTo(map);});}
+  else{Object.values(sacredState).forEach(st=>{if(st.on&&map.hasLayer(st.layer)) map.removeLayer(st.layer);});}
+}
+document.querySelectorAll('.tab').forEach(tab=>{
+  tab.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));
+    document.querySelectorAll('.pane').forEach(x=>x.classList.remove('on'));
+    tab.classList.add('on');
+    document.getElementById('pane-'+tab.dataset.tab).classList.add('on');
+    syncTab(tab.dataset.tab);
+  });
+});
+}).catch(err => {
+  console.error('Atlas init error:', err);
+  document.getElementById('loading').innerHTML =
+    '<p style="color:#dc2626;font-family:Inter,system-ui,sans-serif;font-size:13px;text-align:center;max-width:400px;">'
+    + 'Failed to load data.<br><br>'
+    + '<span style="color:#6b6b63">The atlas needs a local server.<br>'
+    + 'Run: <code>python -m http.server 8000</code><br>'
+    + 'Then open <code>http://localhost:8000</code></span><br><br>'
+    + '<span style="color:#dc2626;font-size:11px;">'+String(err.message||err).replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</span></p>';
+});
+
+</script>
+</body>
+</html>

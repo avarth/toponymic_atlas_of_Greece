@@ -1,0 +1,155 @@
+<!--
+  Atlas HTML skeleton — template for build.py.
+
+  build.py replaces placeholders with src/css/style.css and
+  concatenated src/js/*.js (constants → i18n →
+  colors → layers → charts → sacred → poly → oddities → main)
+
+  Output (greek_toponymic_atlas.html) is written to atlas/
+  alongside atlas/data/ so fetch('data/*.json') paths resolve correctly.
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ελληνικός Τοπωνυμικός Άτλας</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" integrity="sha512-h9FcoyWjHcOcmEVkxOfTLnmZFWIH0iZhZT1H2TbOq55xssQGEJHEaIm+PgoUaZbRvQTNTluNOEfb1ZRy6D3BOw==" crossorigin="anonymous" referrerpolicy="no-referrer"/>
+<style>
+{{STYLE}}
+</style>
+</head>
+<body>
+
+<div id="panel">
+  <div class="hdr">
+    <div class="hdr-title-row"><h1 data-i="title">Greek Toponymic Atlas</h1><button class="info-btn" id="info-btn" title="About this atlas">i</button></div>
+    <div class="hdr-ctrls">
+      <div class="filter-toggle">
+        <button class="fbtn on" data-filter="all" data-i="f_all">All</button>
+        <button class="fbtn" data-filter="urb" data-i="f_urb">Urban</button>
+        <button class="fbtn" data-filter="rur" data-i="f_rur">Rural</button>
+      </div>
+      <button class="lang-btn" id="lang-btn">Ελληνικά</button>
+    </div>
+  </div>
+  <div class="tabs">
+    <div class="tab on" data-tab="maps" data-i="tab_maps">Naming</div>
+    <div class="tab" data-tab="modif" data-i="tab_modif">Modifiers</div>
+    <div class="tab" data-tab="saints" data-i="tab_saints">Sacred Names</div>
+    <div class="tab" data-tab="poly" data-i="tab_poly">Polymorphism</div>
+    <div class="tab" data-tab="etym" data-i="tab_etym">Origins</div>
+    <div class="tab" data-tab="odd" data-i="tab_odd">Oddities</div>
+  </div>
+
+  <!-- TAB: NAMING -->
+  <div class="pane on" id="pane-maps">
+    <div class="lcard on" data-layer="sem"><div class="lcard-row">
+      <div class="sw sw-cat"><svg viewBox="0 0 24 24"><path d="M12 12 L12 2 A10 10 0 0 1 20.66 17 Z" fill="#1e3a5f"/><path d="M12 12 L20.66 17 A10 10 0 0 1 3.34 17 Z" fill="#b34a2c"/><path d="M12 12 L3.34 17 A10 10 0 0 1 8 3.34 Z" fill="#6b8e4e"/><path d="M12 12 L8 3.34 A10 10 0 0 1 12 2 Z" fill="#c9963c"/></svg></div>
+      <div><div class="ln" data-i="l_sem">What Names Are About</div>
+        <div class="ld-desc" data-i="d_sem">Dominant naming theme per area</div></div></div>
+      <div class="leg" id="sem-leg"></div>
+    </div>
+    <div class="lcard" data-layer="sem_ent"><div class="lcard-row">
+      <div class="sw"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="7" opacity=".55"/><circle cx="12" cy="12" r="11" opacity=".25"/></svg></div>
+      <div><div class="ln" data-i="l_sem_ent">Thematic Diversity</div>
+        <div class="ld-desc" data-i="d_sem_ent">How evenly spread are naming themes across categories?</div></div></div>
+      <div class="leg"><span class="li"><span class="ldot" style="background:#f4f1ea;border:1px solid #d9d3c7"></span><span data-i="mono">Mono-thematic</span></span>
+        <span class="li"><span class="ldot" style="background:#264856"></span><span data-i="multi">Multi-thematic</span></span></div>
+    </div>
+
+    <div class="chart-wrap" id="chart-sem"></div>
+    <div class="chart-wrap" id="chart-topnames"></div>
+  </div>
+
+  <!-- TAB: MODIFIERS -->
+  <div class="pane" id="pane-modif">
+    <div class="lcard on" data-layer="pfx_all"><div class="lcard-row">
+      <div class="sw"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="5" width="16" height="3" opacity=".3"/><rect x="4" y="10.5" width="12" height="3" opacity=".6"/><rect x="4" y="16" width="8" height="3"/></svg></div>
+      <div><div class="ln" data-i="l_pall">All Modifiers</div>
+        <div class="ld-desc" data-i="d_pall">% of names with any modifier</div></div></div></div>
+    <div class="lcard" data-layer="pfx_neo"><div class="lcard-row">
+      <div class="sw"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21 V7 M6.5 12.5 L12 7 L17.5 12.5"/><path d="M5 21 H19" opacity=".5"/></svg></div>
+      <div><div class="ln" data-i="l_neo">Νέο — "New"</div>
+        <div class="ld-desc" data-i="d_neo">Resettlement, refugee villages (post-1922)</div></div></div></div>
+    <div class="lcard" data-layer="pfx_pal"><div class="lcard-row">
+      <div class="sw"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4 H18 M6 20 H18 M7 4 C7 10 17 14 17 20 M17 4 C17 10 7 14 7 20"/></svg></div>
+      <div><div class="ln" data-i="l_pal">Παλαιό — "Old"</div>
+        <div class="ld-desc" data-i="d_pal">Abandoned or renamed settlements</div></div></div></div>
+    <div class="lcard" data-layer="pfx_ano"><div class="lcard-row">
+      <div class="sw"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 14 L12 7 L19 14"/><path d="M5 20 L12 13 L19 20" opacity=".45"/></svg></div>
+      <div><div class="ln" data-i="l_ano">Άνω — "Upper"</div>
+        <div class="ld-desc" data-i="d_ano">Upper half of split settlements</div></div></div></div>
+    <div class="lcard" data-layer="pfx_kat"><div class="lcard-row">
+      <div class="sw"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4 L12 11 L19 4" opacity=".45"/><path d="M5 10 L12 17 L19 10"/></svg></div>
+      <div><div class="ln" data-i="l_kat">Κάτω — "Lower"</div>
+        <div class="ld-desc" data-i="d_kat">Lower half of split settlements</div></div></div></div>
+    <div class="lcard" data-layer="pfx_meg"><div class="lcard-row">
+      <div class="sw"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="9" cy="12" r="8"/><circle cx="19" cy="12" r="3" opacity=".45"/></svg></div>
+      <div><div class="ln" data-i="l_meg">Μεγάλο — "Big"</div>
+        <div class="ld-desc" data-i="d_meg">Larger of a size pair</div></div></div></div>
+    <div class="lcard" data-layer="pfx_mik"><div class="lcard-row">
+      <div class="sw"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="15" cy="12" r="8" opacity=".45"/><circle cx="5" cy="12" r="3"/></svg></div>
+      <div><div class="ln" data-i="l_mik">Μικρό — "Small"</div>
+        <div class="ld-desc" data-i="d_mik">Smaller of a size pair</div></div></div></div>
+    <div class="chart-wrap" id="chart-mods"></div>
+  </div>
+
+  <!-- TAB: SACRED NAMES -->
+  <div class="pane" id="pane-saints">
+    <p class="chip-note" data-i="saints_note">Toggle sacred names to map their geographic spread across Greece.</p>
+    <div id="sacred-groups"></div>
+  </div>
+
+  <!-- TAB: POLYMORPHISM -->
+  <div class="pane" id="pane-poly">
+    <p class="chip-note" data-i="poly_note">Names appearing as many different feature types — ranked by how evenly spread, not just frequency.</p>
+    <select class="poly-sel" id="poly-sel"><option value="" data-i="poly_ph">— Select a name —</option></select>
+    <div class="poly-detail" id="poly-detail"></div>
+  </div>
+
+  <!-- TAB: ORIGINS -->
+  <div class="pane" id="pane-etym">
+    <div class="lcard on" data-layer="etym_div"><div class="lcard-row">
+      <div class="sw"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="9" cy="9" r="6"/><circle cx="15" cy="15" r="6" opacity=".55"/><circle cx="15" cy="9" r="4" opacity=".3"/></svg></div>
+      <div><div class="ln" data-i="l_ediv">Naming Layer Diversity</div>
+        <div class="ld-desc" data-i="d_ediv">How many distinct linguistic origins are present?</div></div></div>
+      <div class="leg"><span class="li"><span class="ldot" style="background:#f4f1ea;border:1px solid #d9d3c7"></span><span data-i="onlygk">Only Greek</span></span>
+        <span class="li"><span class="ldot" style="background:#8a7658"></span><span data-i="highdiv">More diverse</span></span></div>
+    </div>
+    <div class="chart-wrap" id="chart-etym"></div>
+    <div class="conf-legend">
+      <span class="conf-title" data-i="conf_title">Classification confidence</span>
+      <span class="conf-item"><span class="conf-dot conf-h"></span><span data-i="conf_high">High</span></span>
+      <span class="conf-item"><span class="conf-dot conf-m"></span><span data-i="conf_med">Medium</span></span>
+      <span class="conf-item"><span class="conf-dot conf-l"></span><span data-i="conf_low">Low</span></span>
+    </div>
+    <div class="etym-note"><b data-i="enote_t">Note:</b> <span data-i="enote_b">This map shows the diversity of place names by most probable linguistic origin. It is not an indication of the ethnic, linguistic, or religious composition of present-day populations. See Info for more.</span></div>
+  </div>
+
+  <!-- TAB: ODDITIES -->
+  <div class="pane" id="pane-odd">
+    <p class="chip-note" data-i="odd_note">Curated collection of Greece's most colourful place names. Toggle categories to explore.</p>
+    <div class="chip-wrap" id="odd-chips"></div>
+    <div id="odd-list" style="margin-top:12px;"></div>
+  </div>
+</div>
+
+<div id="map"></div>
+<div id="loading" style="position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:var(--bg);">
+  <p style="font-family:Inter,system-ui,sans-serif;color:var(--muted);font-size:14px;">Loading atlas data&hellip;</p>
+</div>
+
+<div class="info-overlay" id="info-overlay">
+  <div class="info-modal">
+    <button class="info-close" id="info-close">&times;</button>
+    <div class="info-body" id="info-body"></div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js" integrity="sha512-puJW3E/qXDqYp9IfhAI54BJEaWIfloJ7JWs7OeD5i6ruC9JZL1gERT1wjtwXFlh7CjE7ZJ+/vcRZRkIYIb6p4g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script>
+{{SCRIPT}}
+</script>
+</body>
+</html>
