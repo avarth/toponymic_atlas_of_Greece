@@ -388,6 +388,7 @@ def compute_profiles(hex_feats, hexes):
     """Compute word cloud and semantic counts per hex.
 
     Returns dict keyed by "lat,lon" center string.
+    Each wc entry is [name, count, semantic_category].
     """
     profiles = {}
     for hi, hx in enumerate(hexes):
@@ -396,7 +397,17 @@ def compute_profiles(hex_feats, hexes):
             continue
         center_key = f"{hx['c'][0]},{hx['c'][1]}"
         name_counts = Counter(f["name_gr"] for f in feats)
-        wc = name_counts.most_common()
+        # For each name, pick the most common semantic category among its features
+        name_sem = {}
+        for f in feats:
+            name = f["name_gr"]
+            if name not in name_sem:
+                name_sem[name] = Counter()
+            name_sem[name][f["semantic"]] += 1
+        wc = [
+            [name, count, name_sem[name].most_common(1)[0][0]]
+            for name, count in name_counts.most_common()
+        ]
         sc = dict(Counter(f["semantic"] for f in feats).most_common())
         profiles[center_key] = {"wc": wc, "sc": sc, "n": len(feats)}
     return profiles
