@@ -183,7 +183,8 @@ function buildInfoContent(){
 <h2>Greek Toponymic Atlas</h2>
 <div class="info-version">Version 1.0 &middot; 2026</div>
 <div class="info-author">Aris Vartholomaios &middot; University of Thessaly</div>
-<div class="info-license">MIT License &middot; <a href="https://github.com/avarth/toponymic_atlas_of_Greece" target="_blank" rel="noopener">Source code</a></div>
+<div class="info-license">Code: MIT &middot; Content &amp; data: CC BY-NC-ND 4.0 &middot; <a href="https://github.com/avarth/toponymic_atlas_of_Greece" target="_blank" rel="noopener">Source code</a></div>
+<div class="info-license">Cite: Vartholomaios, A. (2026). <i>Greek Toponymic Atlas</i> (v1.0). Zenodo. <a href="https://doi.org/10.5281/zenodo.19443730" target="_blank" rel="noopener">doi:10.5281/zenodo.19443730</a></div>
 
 <h3>Abstract</h3>
 <p>Interactive spatial analysis of 41,932 unique place names (90,592 geocoded features) from the National Gazetteer of Geographical Names of Greece. Each toponym is classified by etymological origin (Greek, Turkish/Ottoman, Slavic, Albanian, Venetian/Italian, Mixed, Unknown) and semantic category (religious, geomorphic, flora, fauna, anthroponym, etc.). Results are visualised on an H3 hexagonal grid across six thematic layers.</p>
@@ -191,9 +192,9 @@ function buildInfoContent(){
 <h3>Methodology</h3>
 <p>Etymological origin is assigned through a three-stage hybrid pipeline:</p>
 <ul>
-<li><b>Stage 1 — Morphological rules:</b> Each name is matched against a combined Greek lexicon (84,619 lemmas from Wiktionary via Kaikki.org + 1,047,153 word forms from the EELLAK spell dictionary) and curated pattern inventories for non-Greek morphemes (Slavic, Turkish/Ottoman, Venetian, Albanian). The core rule is: etymology follows the root's living language. This stage resolves approximately 78% of names.</li>
-<li><b>Stage 2 — LLM disambiguation:</b> Unresolved names are processed through a large language model (Claude Sonnet) with the full classification ruleset embedded. The model returns an etymology, semantic category, and reasoning chain, adjudicated against Stage 1 via confidence-weighted merge.</li>
-<li><b>Stage 3 — Expert validation:</b> A stratified sample of 200 names is manually reviewed; all 2,468 non-Greek classifications are individually verified through LLM-drafted corrections reviewed by a domain expert.</li>
+<li><b>Stage 1 — Morphological rules:</b> Each name is matched against a combined Greek lexicon (84,619 lemmas from Wiktionary via Kaikki.org + 1,047,153 word forms from the EELLAK spell dictionary) and curated pattern inventories for non-Greek morphemes (Slavic, Turkish/Ottoman, Venetian, Albanian). The core rule is: etymology follows the root's living language. Classification refers to the linguistic origin of the name's root, following standard etymological practice — it does not reflect the language historically or currently spoken at a location, nor the identity of its inhabitants. This stage resolves approximately 78% of names.</li>
+<li><b>Stage 2 — LLM disambiguation:</b> Unresolved names are processed through a large language model (Claude Sonnet 4.6, Anthropic) with the full classification ruleset embedded. The model returns an etymology, semantic category, and reasoning chain, adjudicated against Stage 1 via confidence-weighted merge.</li>
+<li><b>Stage 3 — Manual validation:</b> A stratified sample of 200 names is manually reviewed by the author against published etymological references; all 2,468 non-Greek classifications are individually verified through LLM-drafted corrections reviewed and adjudicated by the author against the same sources.</li>
 </ul>
 <p>Semantic categories are assigned primarily by the LLM, which analyses name morphology, root meaning, and feature-type context. The gazetteer's 104 feature types provide a coarse signal (e.g., Chapel &rarr; religious), but most names require deeper analysis. Approximately 65% of names are classified as semantically opaque — an accurate reflection of lexical erosion in Greek toponymy.</p>
 
@@ -208,18 +209,19 @@ function buildInfoContent(){
 <p>Basemap tiles by <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>. Map data &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors. Built with <a href="https://leafletjs.com" target="_blank" rel="noopener">Leaflet</a>.</p>
 
 <h3>Oversights &amp; Errata</h3>
-<p>Every care has been taken to ensure accuracy. Etymological origin and semantic classification were produced through a combination of automated methods and expert review; however, the process was validated on a stratified sample rather than exhaustively for all 41,932 names. Errors in individual classifications are possible, particularly for rare or locally specific toponyms.</p>
-<p>If you notice an error or have a correction to suggest, please <a href="https://github.com/avarth/toponymic_atlas_of_Greece/issues" target="_blank" rel="noopener">open an issue</a> on the project repository.</p>
+<p>Every care has been taken to ensure accuracy. Etymological origin and semantic classification were produced through a combination of automated methods and manual review against published sources; however, the process was validated on a stratified sample rather than exhaustively for all 41,932 names. Errors in individual classifications are possible, particularly for rare or locally specific toponyms.</p>
+<p>If you notice an error or have a correction to suggest, please <a href="https://github.com/avarth/toponymic_atlas_of_Greece/issues" target="_blank" rel="noopener">open an issue</a> including the toponym, the proposed correction, and a published source supporting it.</p>
 
 <h3>AI Disclosure</h3>
 <p>This tool was developed with AI assistance (Anthropic Claude Opus 4.6 / Sonnet 4.6). The author designed the architecture and planned all features; AI tools were used to draft code diffs, code cleanup and implementation. All AI-generated code was reviewed by the author before inclusion. The author takes full responsibility for the correctness, design, and scientific validity of the code.</p>
 
-<div class="info-warn"><b>Note:</b> This atlas maps the diversity of place names by most probable linguistic origin. It is not an indication of the ethnic, linguistic, or religious composition of present-day populations. Hexagons are a spatial analysis unit and do not indicate or imply territorial claims.</div>
+<div class="info-warn"><b>Note:</b> This atlas maps the diversity of place names by most probable linguistic origin of the name's root, following standard etymological practice. It is not an indication of the language historically or currently spoken at any location, nor of the ethnic, linguistic, or religious composition of present-day populations. Hexagons are a spatial analysis unit and do not indicate or imply territorial claims.</div>
 `:`
 <h2>Ελληνικός Τοπωνυμικός Άτλας</h2>
 <div class="info-version">Έκδοση 1.0 &middot; 2026</div>
 <div class="info-author">Άρης Βαρθολομαίος &middot; Πανεπιστήμιο Θεσσαλίας</div>
-<div class="info-license">Άδεια MIT &middot; <a href="https://github.com/avarth/toponymic_atlas_of_Greece" target="_blank" rel="noopener">Πηγαίος κώδικας</a></div>
+<div class="info-license">Κώδικας: MIT &middot; Περιεχόμενο &amp; δεδομένα: CC BY-NC-ND 4.0 &middot; <a href="https://github.com/avarth/toponymic_atlas_of_Greece" target="_blank" rel="noopener">Πηγαίος κώδικας</a></div>
+<div class="info-license">Αναφορά: Vartholomaios, A. (2026). <i>Greek Toponymic Atlas</i> (v1.0). Zenodo. <a href="https://doi.org/10.5281/zenodo.19443730" target="_blank" rel="noopener">doi:10.5281/zenodo.19443730</a></div>
 
 <h3>Περίληψη</h3>
 <p>Διαδραστική χωρική ανάλυση 41.932 μοναδικών τοπωνυμίων (90.592 γεωκωδικοποιημένα χαρακτηριστικά) από το Εθνικό Μητρώο Γεωγραφικών Ονομάτων της Ελλάδας. Κάθε τοπωνύμιο ταξινομείται κατά ετυμολογική προέλευση (ελληνική, τουρκο-οθωμανική, σλαβική, αλβανική, βενετσιάνικη, μικτή, άγνωστη) και σημασιολογική κατηγορία (θρησκευτικό, γεωμορφολογικό, χλωρίδα, πανίδα, ανθρωπωνύμιο κ.ά.). Τα αποτελέσματα απεικονίζονται σε εξαγωνικό πλέγμα H3 μέσω έξι θεματικών επιπέδων.</p>
@@ -227,9 +229,9 @@ function buildInfoContent(){
 <h3>Μεθοδολογία</h3>
 <p>Η ετυμολογική προέλευση αποδίδεται μέσω υβριδικής μεθοδολογίας τριών σταδίων:</p>
 <ul>
-<li><b>Στάδιο 1 — Μορφολογικοί κανόνες:</b> Κάθε όνομα αντιπαραβάλλεται με συνδυασμένο ελληνικό λεξικό (84.619 λήμματα από Wiktionary μέσω Kaikki.org + 1.047.153 τύποι λέξεων από το ορθογραφικό λεξικό ΕΕΛΛΑΚ) και επιμελημένα ευρετήρια μη ελληνικών μορφημάτων. Βασικός κανόνας: η ετυμολογία ακολουθεί τη ζωντανή γλώσσα της ρίζας. Το στάδιο αυτό επιλύει περίπου το 78% των ονομάτων.</li>
-<li><b>Στάδιο 2 — Αποσαφήνιση μέσω LLM:</b> Τα ανεπίλυτα ονόματα επεξεργάζονται από γλωσσικό μοντέλο (Claude Sonnet) με ενσωματωμένο το πλήρες σύνολο κανόνων. Το μοντέλο επιστρέφει ετυμολογία, σημασιολογική κατηγορία και αλυσίδα αιτιολόγησης.</li>
-<li><b>Στάδιο 3 — Επικύρωση από ειδικό:</b> Στρωματοποιημένο δείγμα 200 ονομάτων ελέγχεται χειροκίνητα· όλες οι 2.468 μη ελληνικές ταξινομήσεις επαληθεύονται μεμονωμένα μέσω προτάσεων LLM που εξετάζονται από ειδικό.</li>
+<li><b>Στάδιο 1 — Μορφολογικοί κανόνες:</b> Κάθε όνομα αντιπαραβάλλεται με συνδυασμένο ελληνικό λεξικό (84.619 λήμματα από Wiktionary μέσω Kaikki.org + 1.047.153 τύποι λέξεων από το ορθογραφικό λεξικό ΕΕΛΛΑΚ) και επιμελημένα ευρετήρια μη ελληνικών μορφημάτων. Βασικός κανόνας: η ετυμολογία ακολουθεί τη ζωντανή γλώσσα της ρίζας. Η ταξινόμηση αφορά τη γλωσσική προέλευση της ρίζας του ονόματος, κατά την καθιερωμένη ετυμολογική πρακτική — δεν αντανακλά τη γλώσσα που μιλιόταν ή μιλιέται σε μια περιοχή, ούτε την ταυτότητα των κατοίκων της. Το στάδιο αυτό επιλύει περίπου το 78% των ονομάτων.</li>
+<li><b>Στάδιο 2 — Αποσαφήνιση μέσω LLM:</b> Τα ανεπίλυτα ονόματα επεξεργάζονται από γλωσσικό μοντέλο (Claude Sonnet 4.6, Anthropic) με ενσωματωμένο το πλήρες σύνολο κανόνων. Το μοντέλο επιστρέφει ετυμολογία, σημασιολογική κατηγορία και αλυσίδα αιτιολόγησης.</li>
+<li><b>Στάδιο 3 — Χειροκίνητη επικύρωση:</b> Στρωματοποιημένο δείγμα 200 ονομάτων ελέγχεται χειροκίνητα από τον δημιουργό με αντιπαραβολή σε δημοσιευμένες ετυμολογικές πηγές· όλες οι 2.468 μη ελληνικές ταξινομήσεις επαληθεύονται μεμονωμένα μέσω προτάσεων LLM που εξετάζονται και κρίνονται από τον δημιουργό βάσει των ίδιων πηγών.</li>
 </ul>
 <p>Οι σημασιολογικές κατηγορίες αποδίδονται κυρίως από το γλωσσικό μοντέλο, που αναλύει τη μορφολογία, τη σημασία της ρίζας και τον τύπο χαρακτηριστικού. Οι 104 τύποι του μητρώου παρέχουν ένα αδρό σήμα (π.χ. Εκκλησάκι &rarr; θρησκευτικό), αλλά τα περισσότερα ονόματα απαιτούν βαθύτερη ανάλυση. Περίπου 65% ταξινομούνται ως σημασιολογικά αδιαφανή — αντικατοπτρίζοντας τη λεξιλογική φθορά στην ελληνική τοπωνυμία.</p>
 
@@ -244,12 +246,12 @@ function buildInfoContent(){
 <p>Υπόβαθρο χάρτη: <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>. Δεδομένα χάρτη &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>. Κατασκευή με <a href="https://leafletjs.com" target="_blank" rel="noopener">Leaflet</a>.</p>
 
 <h3>Παραλείψεις &amp; Διορθώσεις</h3>
-<p>Καταβλήθηκε κάθε δυνατή προσπάθεια για την ακρίβεια των δεδομένων. Η ετυμολογική και σημασιολογική ταξινόμηση πραγματοποιήθηκε μέσω συνδυασμού αυτοματοποιημένων μεθόδων και ανθρώπινου ελέγχου· ωστόσο, η επικύρωση βασίστηκε σε στρωματοποιημένο δείγμα και όχι εξαντλητικά για το σύνολο των 41.932 ονομάτων. Σφάλματα σε μεμονωμένες ταξινομήσεις είναι πιθανά, ιδίως σε σπάνια ή τοπικά τοπωνύμια.</p>
-<p>Αν εντοπίσετε κάποιο σφάλμα ή επιθυμείτε να προτείνετε διόρθωση, <a href="https://github.com/avarth/toponymic_atlas_of_Greece/issues" target="_blank" rel="noopener">ανοίξτε ένα issue</a> στο αποθετήριο του έργου.</p>
+<p>Καταβλήθηκε κάθε δυνατή προσπάθεια για την ακρίβεια των δεδομένων. Η ετυμολογική και σημασιολογική ταξινόμηση πραγματοποιήθηκε μέσω συνδυασμού αυτοματοποιημένων μεθόδων και χειροκίνητου ελέγχου με αντιπαραβολή σε δημοσιευμένες πηγές· ωστόσο, η επικύρωση βασίστηκε σε στρωματοποιημένο δείγμα και όχι εξαντλητικά για το σύνολο των 41.932 ονομάτων. Σφάλματα σε μεμονωμένες ταξινομήσεις είναι πιθανά, ιδίως σε σπάνια ή τοπικά τοπωνύμια.</p>
+<p>Αν εντοπίσετε κάποιο σφάλμα ή επιθυμείτε να προτείνετε διόρθωση, <a href="https://github.com/avarth/toponymic_atlas_of_Greece/issues" target="_blank" rel="noopener">ανοίξτε ένα issue</a> αναφέροντας το τοπωνύμιο, την προτεινόμενη διόρθωση και δημοσιευμένη πηγή που την τεκμηριώνει.</p>
 
 <h3>Δήλωση χρήσης AI</h3>
 <p>Το εργαλείο αναπτύχθηκε με τη βοήθεια τεχνητής νοημοσύνης (Anthropic Claude Opus 4.6 / Sonnet 4.6). Ο δημιουργός σχεδίασε την αρχιτεκτονική και προγραμμάτισε όλα τα χαρακτηριστικά· τα εργαλεία AI χρησιμοποιήθηκαν για σύνταξη κώδικα, καθαρισμό και υλοποίηση. Όλος ο κώδικας που παρήχθη από AI ελέγχθηκε από τον δημιουργό πριν τη συμπερίληψή του. Ο δημιουργός φέρει πλήρη ευθύνη για την ορθότητα, τον σχεδιασμό και την επιστημονική εγκυρότητα του κώδικα.</p>
 
-<div class="info-warn"><b>Σημείωση:</b> Ο άτλας καταγράφει την ποικιλία των τοπωνυμίων με βάση την πιθανότερη γλωσσική προέλευση. Δεν αποτελεί ένδειξη εθνοτικής, γλωσσικής ή θρησκευτικής σύνθεσης σημερινών πληθυσμών. Τα εξάγωνα αποτελούν μονάδα χωρικής ανάλυσης και δεν υποδηλώνουν εδαφικές διεκδικήσεις.</div>
+<div class="info-warn"><b>Σημείωση:</b> Ο άτλας καταγράφει την ποικιλία των τοπωνυμίων με βάση την πιθανότερη γλωσσική προέλευση της ρίζας του ονόματος, κατά την καθιερωμένη ετυμολογική πρακτική. Δεν αποτελεί ένδειξη της γλώσσας που μιλιόταν ή μιλιέται σε οποιαδήποτε περιοχή, ούτε της εθνοτικής, γλωσσικής ή θρησκευτικής σύνθεσης σημερινών πληθυσμών. Τα εξάγωνα αποτελούν μονάδα χωρικής ανάλυσης και δεν υποδηλώνουν εδαφικές διεκδικήσεις.</div>
 `);
 }

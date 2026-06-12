@@ -1,21 +1,22 @@
 # Greek Toponymic Atlas
 
 [![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.19443730-blue.svg)](https://doi.org/10.5281/zenodo.19443730)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/Code-MIT-blue.svg)](LICENSE)
+[![License: CC BY-NC-ND 4.0](https://img.shields.io/badge/Content-CC%20BY--NC--ND%204.0-lightgrey.svg)](LICENSE-DATA)
 [![Language: Python](https://img.shields.io/badge/Python-3.10+-yellow.svg)](https://python.org)
 [![Language: JavaScript](https://img.shields.io/badge/JavaScript-ES6+-f7df1e.svg)](atlas/greek_toponymic_atlas.html)
 
 Etymological classification and interactive spatial analysis of 41,932 unique place names (90,592 geocoded features) from the Greek National Gazetteer.
 
-The project combines morphological rule-based classification, large language model (LLM) disambiguation, and expert validation to assign each toponym an etymological origin (Greek, Turkish/Ottoman, Slavic, etc.) and semantic category (religious, geomorphic, flora, etc.). Results are visualised in an interactive hex-binned web atlas.
+The project combines morphological rule-based classification, large language model (LLM) disambiguation, and manual validation against published etymological references to assign each toponym an etymological origin (Greek, Turkish/Ottoman, Slavic, etc.) and semantic category (religious, geomorphic, flora, etc.). Results are visualised in an interactive hex-binned web atlas.
 
-Every care has been taken to ensure accuracy. Etymological origin and semantic classification were produced through a combination of automated methods and expert review; however, the process was validated on a stratified sample rather than exhaustively for all 41,932 names. Errors in individual classifications are possible, particularly for rare or locally specific toponyms.
+Every care has been taken to ensure accuracy. Etymological origin and semantic classification were produced through a combination of automated methods and manual review; however, the process was validated on a stratified sample rather than exhaustively for all 41,932 names. Errors in individual classifications are possible, particularly for rare or locally specific toponyms.
 
-If you notice an error or have a correction to suggest, please open an issue on the project repository.
+If you notice an error or have a correction to suggest, please open an issue including the toponym, the proposed correction, and a published source supporting it.
 
-Note: This atlas maps the diversity of place names by most **probable** linguistic origin. It is **not** an indication of the ethnic, linguistic, or religious composition of present-day populations. Hexagons are a spatial analysis unit and do not indicate or imply territorial claims.
+**Note**: This atlas maps the diversity of place names by most **probable** linguistic origin. Classification refers to the linguistic origin of a name's root, following standard etymological practice; it does **not** reflect the language historically or currently spoken at a location, nor the identity of its inhabitants. It is **not** an indication of the ethnic, linguistic, or religious composition of present-day populations. Hexagons are a spatial analysis unit and do not indicate or imply territorial claims.
 
-Do not publicize anywhere without prior written permission of the author.
+Media or other public-facing coverage of this work: please contact the author first.
 
 ## Data Sources
 
@@ -41,19 +42,19 @@ An algorithmic classifier processes each name against a Greek lexicon (Kaikki.or
 - **Venetian/Italian** -- restricted to words that remain recognisably foreign (*fortezza*, *loggia*); absorbed loanwords (*kastro*, *scala*, *porta*) are classified as Greek.
 - **Albanian markers** -- suffixes *-έσι*, *-έζι*, *-έζα* combined with opaque (non-Greek) roots.
 
-The core classification rule is: **etymology follows the root's living language**. Absorbed foreign suffixes attached to Greek roots do not change the classification. This stage resolves approximately 78% of names with high confidence.
+The core classification rule is: **etymology follows the root's living language**. Absorbed foreign suffixes attached to Greek roots do not change the classification. Classification refers to the linguistic origin of the name's root, following standard etymological practice; it does not reflect the language historically or currently spoken at a location, nor the self-identification of its inhabitants. This stage resolves approximately 78% of names with high confidence.
 
 ### Stage 2: LLM Disambiguation
 
-Names not resolved by Stage 1 (ambiguous morphology, opaque roots, or conflicting signals) are processed through Claude Sonnet (Anthropic) with the full classification ruleset embedded in the system prompt. The LLM receives the name, its geographic feature type, and coordinates, and returns an etymology, semantic category, and reasoning chain. Results are adjudicated against Stage 1 output using a confidence-weighted merge.
+Names not resolved by Stage 1 (ambiguous morphology, opaque roots, or conflicting signals) are processed through Claude Sonnet 4.6 (Anthropic, 2026) with the full classification ruleset embedded in the system prompt. The LLM receives the name, its geographic feature type, and coordinates, and returns an etymology, semantic category, and reasoning chain. Results are adjudicated against Stage 1 output using a confidence-weighted merge.
 
-### Stage 3: Expert Validation and Correction
+### Stage 3: Manual Validation and Correction
 
 The pipeline output is validated through two complementary reviews:
 
-1. **Stratified sample review** -- 200 names drawn from all etymology categories (minority classes oversampled) are manually reviewed by a domain expert. Error patterns identified in the sample (e.g., systematic over-classification of absorbed loanwords as Venetian/Italian) are corrected across the full dataset.
+1. **Stratified sample review** -- 200 names drawn from all etymology categories (minority classes oversampled) are manually reviewed by the author against published etymological references (Wiktionary etymological annotations via Kaikki.org and standard toponymic literature). Error patterns identified in the sample (e.g., systematic over-classification of absorbed loanwords as Venetian/Italian) are corrected across the full dataset.
 
-2. **Full non-Greek review** -- all 2,468 names classified as non-Greek are reviewed individually. An LLM generates draft corrections with reasoning; the expert accepts, modifies, or rejects each suggestion. This ensures that the high-error-rate minority categories (which represent the analytically interesting cases) receive exhaustive human oversight.
+2. **Full non-Greek review** -- all 2,468 names classified as non-Greek are reviewed individually. An LLM generates draft corrections with reasoning; the author accepts, modifies, or rejects each suggestion against the same published references. This ensures that the high-error-rate minority categories (which represent the analytically interesting cases) receive exhaustive human oversight.
 
 Classification rules and validation methodology are described in the info panel of the interactive atlas.
 
@@ -110,6 +111,7 @@ python atlas/build.py
 ## Repository Structure
 
 ```
+analysis/               Classification pipeline (stages 1-3)
 atlas/                  Interactive web atlas
   src/                  HTML template, CSS, JS modules (9 files)
   data/                 Hex-aggregated JSON (auto-generated)
@@ -121,15 +123,31 @@ atlas/                  Interactive web atlas
 
 ## Citation
 
-*Citation information and DOI will be added upon publication.*
+If you use this software, dataset, or any derived figures, please cite:
+
+> Vartholomaios, A. (2026). *Greek Toponymic Atlas* (v1.0). Zenodo. https://doi.org/10.5281/zenodo.19443730
+
+```bibtex
+@software{vartholomaios_2026_toponymic,
+  author    = {Vartholomaios, Aristotelis},
+  title     = {Greek Toponymic Atlas},
+  version   = {1.0},
+  year      = {2026},
+  publisher = {Zenodo},
+  doi       = {10.5281/zenodo.19443730},
+  url       = {https://doi.org/10.5281/zenodo.19443730}
+}
+```
 
 ## License
 
-Code and atlas application are released under the [MIT License](LICENSE). The hex-aggregated atlas data (`atlas/data/`) is included under the same license. The source gazetteer and classified datasets are not included in this repository.
+- **Code** (classification pipeline, atlas application): [MIT License](LICENSE).
+- **Atlas content and aggregated data** (`atlas/data/`, visualisations, accompanying texts): [CC BY-NC-ND 4.0](LICENSE-DATA) — attribution required, no derivatives, no commercial use.
+- The source gazetteer and the per-name classified dataset are **not** included in this repository. The National Gazetteer remains © HMGS/HNHS under its own terms.
 
 ## AI Disclosure
 
-This tool was developed with AI assistance (Anthropic Claude Opus 4.6 / Sonnet 4.6). The author designed the architecture and planned all features; AI tools were used to draft code diffs, code cleanup and implementation. All AI-generated code was reviewed by the author before inclusion. The author takes full responsibility for the correctness, design, and scientific validity of the code.
+This tool was developed with AI assistance (Anthropic Claude Opus 4.6 / Sonnet 4.6). The author designed the architecture and planned all features; AI tools were used to draft code diffs, code cleanup and implementation. All AI-generated code was reviewed by the author before inclusion. Etymological and semantic classifications produced by the LLM (Stage 2) were validated as described in the methodology above. The author takes full responsibility for the correctness, design, and scientific validity of the code.
 
 ## Acknowledgements
 

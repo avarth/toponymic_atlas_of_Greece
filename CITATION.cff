@@ -1,0 +1,23 @@
+cff-version: 1.2.0
+message: "If you use this software or its outputs, please cite it as below."
+type: software
+title: "Greek Toponymic Atlas"
+abstract: "Etymological classification and interactive spatial analysis of 41,932 unique place names (90,592 geocoded features) from the Greek National Gazetteer, combining morphological rules, LLM disambiguation, and manual validation."
+authors:
+  - family-names: "Vartholomaios"
+    given-names: "Aristotelis"
+    affiliation: "University of Thessaly, Department of Planning and Regional Development"
+    orcid: "https://orcid.org/0000-0001-6177-1130"
+version: "1.0"
+doi: 10.5281/zenodo.19443730
+date-released: "2026-04-06"
+url: "https://github.com/avarth/toponymic_atlas_of_Greece"
+license: MIT
+keywords:
+  - toponymy
+  - place names
+  - Greece
+  - GIS
+  - spatial analysis
+  - etymology
+  - large language models

@@ -1,0 +1,41 @@
+Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International
+(CC BY-NC-ND 4.0)
+
+This license applies to the ATLAS CONTENT AND AGGREGATED DATA of the Greek
+Toponymic Atlas, namely:
+
+  - the hex-aggregated datasets in atlas/data/
+  - all visualisations, maps, figures, and screenshots produced by the atlas
+  - the accompanying descriptive and methodological texts
+
+Copyright (c) 2026 Aristotelis Vartholomaios
+
+You are free to:
+
+  Share -- copy and redistribute the material in any medium or format,
+  under the following terms:
+
+  Attribution    -- You must give appropriate credit (cite: Vartholomaios, A.
+                    (2026). Greek Toponymic Atlas (v1.0). Zenodo.
+                    https://doi.org/10.5281/zenodo.19443730), provide a link
+                    to the license, and indicate if changes were made.
+  NonCommercial  -- You may not use the material for commercial purposes.
+  NoDerivatives  -- If you remix, transform, or build upon the material,
+                    you may not distribute the modified material.
+
+No additional restrictions -- You may not apply legal terms or technological
+measures that legally restrict others from doing anything the license permits.
+
+This is a human-readable summary of (and not a substitute for) the license.
+Full legal text: https://creativecommons.org/licenses/by-nc-nd/4.0/legalcode
+
+NOTES
+
+  - The SOURCE CODE of this repository (classification pipeline and atlas
+    application) is licensed separately under the MIT License (see LICENSE).
+  - The source gazetteer (National Gazetteer of Geographical Names of Greece)
+    remains the property of HMGS/HNHS under its own terms and is NOT included
+    in this repository.
+  - The per-name classified dataset is not included in this repository.
+  - For permissions beyond the scope of this license (including derivative
+    academic use of the aggregated data), contact the author.
