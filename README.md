@@ -1,6 +1,6 @@
 # Greek Toponymic Atlas
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19443730.svg)](https://doi.org/10.5281/zenodo.19443730)
+[![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.19443730-blue.svg)](https://doi.org/10.5281/zenodo.19443730)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Language: Python](https://img.shields.io/badge/Python-3.10+-yellow.svg)](https://python.org)
 [![Language: JavaScript](https://img.shields.io/badge/JavaScript-ES6+-f7df1e.svg)](atlas/greek_toponymic_atlas.html)
@@ -8,6 +8,14 @@
 Etymological classification and interactive spatial analysis of 41,932 unique place names (90,592 geocoded features) from the Greek National Gazetteer.
 
 The project combines morphological rule-based classification, large language model (LLM) disambiguation, and expert validation to assign each toponym an etymological origin (Greek, Turkish/Ottoman, Slavic, etc.) and semantic category (religious, geomorphic, flora, etc.). Results are visualised in an interactive hex-binned web atlas.
+
+Every care has been taken to ensure accuracy. Etymological origin and semantic classification were produced through a combination of automated methods and expert review; however, the process was validated on a stratified sample rather than exhaustively for all 41,932 names. Errors in individual classifications are possible, particularly for rare or locally specific toponyms.
+
+If you notice an error or have a correction to suggest, please open an issue on the project repository.
+
+Note: This atlas maps the diversity of place names by most **probable** linguistic origin. It is **not** an indication of the ethnic, linguistic, or religious composition of present-day populations. Hexagons are a spatial analysis unit and do not indicate or imply territorial claims.
+
+Do not publicize anywhere without prior written permission of the author.
 
 ## Data Sources
 
